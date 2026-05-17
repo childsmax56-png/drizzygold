@@ -33,6 +33,7 @@ export const CUSTOM_IMAGES: Record<string, string> = {
   "Honestly, Nevermind":                  "https://i.ibb.co/PBPhRy5/Honestly-Nevermind-Drake.png",
   "Her Loss":                             "https://i.ibb.co/nq3Mt2TS/Drake-and-21-Savage-Her-Loss.png",
   "For All The Dogs":                     "https://i.ibb.co/991mxf4v/Drake-For-All-The-Dogs.png",
+  "Scary Hours 3":                        "https://i.ibb.co/m5xCZN1W/attachment-drake-scary-hours-3-cover.jpg",
   "100 GIGS":                             "https://i.ibb.co/4Zsk4MmL/Drake-100-Gigs.png",
   "$ome $exy $ongs 4 U":                  "https://i.ibb.co/G33GRf3v/SSSFU.jpg",
   "ICEMAN [V1]":                          "https://i.ibb.co/6R3dhyc4/Iceman-V1.webp",
