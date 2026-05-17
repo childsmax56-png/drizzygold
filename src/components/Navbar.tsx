@@ -87,7 +87,7 @@ export function Navbar({ searchQuery, setSearchQuery, filters, setFilters, onHom
           <div className="md:hidden flex items-center shrink-0">
             <img
               src="/logo.png"
-              alt="KDOT Gold"
+              alt="DRIZZYGOLD"
               onClick={onHomeClick}
               className="h-[48px] w-[160px] object-contain object-center cursor-pointer hover:opacity-80 transition-opacity duration-300"
             />
@@ -133,7 +133,7 @@ export function Navbar({ searchQuery, setSearchQuery, filters, setFilters, onHom
               <div className="hidden md:block flex-1 h-[64px] overflow-hidden">
                 <img
                   src="/logo.png"
-                  alt="KDOT Gold"
+                  alt="DRIZZYGOLD"
                   onClick={onHomeClick}
                   className="w-full h-full object-contain object-center cursor-pointer hover:opacity-80 transition-opacity duration-300"
                     />

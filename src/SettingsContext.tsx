@@ -105,7 +105,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (typeof localStorage !== 'undefined') {
-      const saved = localStorage.getItem('kdotgold_settings');
+      const saved = localStorage.getItem('drizzygold_settings');
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
@@ -126,7 +126,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('kdotgold_settings', JSON.stringify(settings));
+      localStorage.setItem('drizzygold_settings', JSON.stringify(settings));
     }
   }, [settings]);
 

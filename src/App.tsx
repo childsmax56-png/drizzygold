@@ -198,7 +198,7 @@ export default function App() {
 
   const [favoriteKeys, setFavoriteKeys] = useState<{ songName: string, eraName: string, url: string, song?: Song }[]>(() => {
     if (typeof localStorage !== 'undefined') {
-      const saved = localStorage.getItem('kdotgold_favorite_keys');
+      const saved = localStorage.getItem('drizzygold_favorite_keys');
       if (saved) {
         try {
           return JSON.parse(saved);
@@ -212,7 +212,7 @@ export default function App() {
 
   useEffect(() => {
     if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('kdotgold_favorite_keys', JSON.stringify(favoriteKeys));
+      localStorage.setItem('drizzygold_favorite_keys', JSON.stringify(favoriteKeys));
     }
   }, [favoriteKeys]);
 
@@ -247,7 +247,7 @@ export default function App() {
     }
     if (typeof localStorage !== 'undefined') {
       try {
-        const saved = localStorage.getItem('kdotgold_playback_state');
+        const saved = localStorage.getItem('drizzygold_playback_state');
         if (saved) {
           const parsed = JSON.parse(saved);
           if (typeof parsed.volume === 'number' && parsed.volume >= 0 && parsed.volume <= 1) {
@@ -284,7 +284,7 @@ export default function App() {
         volume: volume,
         currentTime: currentTime
       };
-      localStorage.setItem('kdotgold_playback_state', JSON.stringify(stateToSave));
+      localStorage.setItem('drizzygold_playback_state', JSON.stringify(stateToSave));
     }
   }, [currentSong, currentEra, volume, currentTime]);
 
@@ -292,7 +292,7 @@ export default function App() {
     if (data && recentData.length > 0 && !initialLoadRef.current) {
       initialLoadRef.current = true;
       if (typeof localStorage !== 'undefined') {
-        const saved = localStorage.getItem('kdotgold_playback_state');
+        const saved = localStorage.getItem('drizzygold_playback_state');
         if (saved) {
           try {
             const parsed = JSON.parse(saved);
@@ -329,7 +329,7 @@ export default function App() {
                   handlePlaySong(songToRestore as Song, eraToRestore as Era, undefined, false, false);
                 }
               } else if (savedEraName === 'Favorites') {
-                const savedFavs = localStorage.getItem('kdotgold_favorite_keys');
+                const savedFavs = localStorage.getItem('drizzygold_favorite_keys');
                 if (savedFavs) {
                    const favKeys = JSON.parse(savedFavs);
                    const favEra = {
@@ -897,7 +897,7 @@ export default function App() {
         console.error("Failed to fetch music videos data:", err);
       });
 
-    // Remix data not yet sourced for KDOTGOLD
+    // Remix data not yet sourced for DRIZZYGOLD
 
     axios.get('/api/art')
       .then(res => {
@@ -972,7 +972,7 @@ export default function App() {
         console.error("Failed to fetch Fakes data:", err);
       });
 
-    // Samples data not yet sourced for KDOTGOLD
+    // Samples data not yet sourced for DRIZZYGOLD
 
     axios.get('/api/tracklists')
       .then(res => {
@@ -2380,10 +2380,10 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
 
           <div className="mt-auto px-6 py-8 text-center border-t border-white/5">
             <p className="text-[10px] text-white/30 leading-relaxed">
-              KDOTGOLD does not host or hold any illegal files. All links are external and provided as-is for educational and archival purposes only.
+              DRIZZYGOLD does not host or hold any illegal files. All links are external and provided as-is for educational and archival purposes only.
             </p>
             <p className="text-[10px] text-white/30 leading-relaxed">
-              KDOTGOLD 2026 ©
+              DRIZZYGOLD 2026 ©
             </p>
           </div>
         </main>

@@ -259,7 +259,7 @@ export function CompsView({ eras, searchQuery, onNavigateToYedits }: CompsViewPr
           <div className="flex items-center justify-center py-6 px-8 gap-6">
             <img
               src="/yedit-affiliates-logo.png"
-              alt="KDOT Gold Yedit Affiliates"
+              alt="DRIZZYGOLD Yedit Affiliates"
               className="h-20 w-20 object-contain"
             />
             <div className="flex flex-col items-start">
