@@ -13,11 +13,15 @@ export const onRequestGet: PagesFunction = async (context) => {
   const filtered = rows.filter(row => {
     const era = (row['Era'] || '').trim();
     if (!era) return false;
-    // Skip stats rows: "N OG File(s)..." or "N Full..." patterns
+    // Skip stats rows: "N OG File(s)...", "N Full...", "N Total Links..."
     if (/^\d+\s+(OG\s+File|Full|Total Links)/.test(era)) return false;
-    // Skip changelog / guideline rows that contain a date in parentheses
-    if (/\(\d{2}\/\d{2}\/\d{4}\)/.test(era)) return false;
-    // Skip rows where Era is clearly a long guideline/note (>80 chars)
+    // Skip changelog entries (date in parens with 2 or 4 digit year)
+    if (/\(\d{2}\/\d{2}\/\d{2,4}\)/.test(era)) return false;
+    // Skip guideline / note rows by common leading words
+    if (/^(Added|Changed|Deleted|Removed|Upgraded|Converted|Readded|Replaced|Shortened|Re-colored|Tracker\b|Update\b|Links\b|Follow\b|Check\s|No\s|Put\s|Make\s|Special\s|To\s|All\s|Ordering\s)/i.test(era)) return false;
+    // Skip sentences (guidelines end with . or !)
+    if (era.endsWith('.') || era.endsWith('!')) return false;
+    // Skip long notes
     if (era.length > 80) return false;
     return true;
   });
