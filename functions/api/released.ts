@@ -5,12 +5,7 @@ const VALID_TYPES = new Set(['Feature', 'Production', 'Single', 'Album Track', '
 function normalizeRow(row: Record<string, string>): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [key, val] of Object.entries(row)) {
-    const base = key.split('\n')[0].trim();
-    const mapped =
-      base === 'Track Length' ? 'Length' :
-      base === 'Release Date' ? 'Release Date' :
-      base;
-    out[mapped] = val;
+    out[key === 'Track Length' ? 'Length' : key] = val;
   }
   return out;
 }
@@ -26,7 +21,7 @@ export const onRequestGet: PagesFunction = async (context) => {
   const rows = parseCSV(text);
 
   const filtered = rows
-    .filter(row => VALID_TYPES.has((row['Type'] || '').trim()))
+    .filter(row => (row['Era'] || '').trim() && VALID_TYPES.has((row['Type'] || '').trim()))
     .map(normalizeRow);
 
   return csvResponse(filtered);

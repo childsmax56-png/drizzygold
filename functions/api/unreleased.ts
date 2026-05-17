@@ -10,5 +10,14 @@ export const onRequestGet: PagesFunction = async (context) => {
   const text = await res.text();
   const rows = parseCSV(text);
 
-  return csvResponse(rows);
+  const filtered = rows.filter(row => {
+    const era = (row['Era'] || '').trim();
+    // Skip stats/summary rows that have OG file counts in the Era column
+    if (/\d+\s+OG\s+File/.test(era)) return false;
+    // Skip rows with no Era value
+    if (!era) return false;
+    return true;
+  });
+
+  return csvResponse(filtered);
 };
