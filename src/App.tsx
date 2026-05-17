@@ -1831,6 +1831,18 @@ let erasArray = (Object.values(data.eras || {}) as Era[])
     fileInfo: CUSTOM_ALBUM_INFO[era.name] || era.fileInfo
   })) as Era[];
 
+{
+  const albumKeys = Object.keys(ALBUM_RELEASE_DATES);
+  erasArray.sort((a, b) => {
+    const aIdx = albumKeys.indexOf(a.name);
+    const bIdx = albumKeys.indexOf(b.name);
+    if (aIdx === -1 && bIdx === -1) return 0;
+    if (aIdx === -1) return 1;
+    if (bIdx === -1) return -1;
+    return aIdx - bIdx;
+  });
+}
+
 let relatedErasArray = (Object.values(data.eras || {}) as Era[])
   .filter(era => HIDDEN_ALBUMS.includes(era.name))
   .map(era => ({
