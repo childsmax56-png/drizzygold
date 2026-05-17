@@ -3,15 +3,19 @@ import { parseCSV, csvResponse } from './_csvParser';
 function normalizeRow(row: Record<string, string>): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [k, v] of Object.entries(row)) {
-    if (k.startsWith('Name'))
+    if (k === 'f')
+      out['Era'] = v;
+    else if (k.startsWith('Name'))
       out['Name'] = v;
     else if (k.startsWith('Notes'))
       out['Notes\n(Join the Discord to help fix any issues + help with dead links)'] = v;
-    else if (k === 'Full\nLength')
-      out['Full Length'] = v;
-    else if (k === 'Leak\nDate')
+    else if (k === 'File')
       out['Leak Date'] = v;
-    else if (k === 'Available\nLength')
+    else if (k === 'Full Length' || k === 'Full\nLength')
+      out['Full Length'] = v;
+    else if (k === 'Leak Date' || k === 'Leak\nDate')
+      out['Leak Date'] = v;
+    else if (k === 'Available Length' || k === 'Available\nLength')
       out['Available Length'] = v;
     else
       out[k] = v;
