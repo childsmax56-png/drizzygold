@@ -1838,12 +1838,21 @@ export default function App() {
     );
   }
 
+const ERA_ORDER_KEYS = Object.keys(ALBUM_RELEASE_DATES);
 let erasArray = (Object.values(data.eras || {}) as Era[])
   .filter(era => !HIDDEN_ALBUMS.includes(era.name))
   .map(era => ({
     ...era,
     fileInfo: CUSTOM_ALBUM_INFO[era.name] || era.fileInfo
-  })) as Era[];
+  }))
+  .sort((a, b) => {
+    const ai = ERA_ORDER_KEYS.indexOf(a.name);
+    const bi = ERA_ORDER_KEYS.indexOf(b.name);
+    if (ai === -1 && bi === -1) return 0;
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  }) as Era[];
 
 let relatedErasArray = (Object.values(data.eras || {}) as Era[])
   .filter(era => HIDDEN_ALBUMS.includes(era.name))
