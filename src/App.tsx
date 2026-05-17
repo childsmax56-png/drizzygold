@@ -10,7 +10,6 @@ import { PlayerBar } from './components/PlayerBar';
 import { FullScreenPlayer } from './components/FullScreenPlayer';
 import { ArtGallery, ArtEntry } from './components/ArtGallery';
 import { StemsView, StemEntry } from './components/StemsView';
-import { MiscView, MiscEntry } from './components/MiscView';
 import { TracklistsView, TracklistAlbum } from './components/TracklistsView';
 import { QueueModal } from './components/QueueModal';
 import { handleShareSilent } from './components/EraDetail';
@@ -91,8 +90,7 @@ export default function App() {
   const [artData, setArtData] = useState<ArtEntry[]>([]);
   const [recentData, setRecentData] = useState<Song[]>([]);
   const [stemsData, setStemsData] = useState<StemEntry[]>([]);
-  const [miscData, setMiscData] = useState<MiscEntry[]>([]);
-  const [fakesData, setFakesData] = useState<FakesEntry[]>([]);
+const [fakesData, setFakesData] = useState<FakesEntry[]>([]);
   const [tracklistsData, setTracklistsData] = useState<TracklistAlbum[]>([]);
   const [releasedData, setReleasedData] = useState<ReleasedEntry[]>([]);
   const [videosData, setVideosData] = useState<VideoRawEntry[]>([]);
@@ -109,8 +107,7 @@ export default function App() {
     const path = window.location.pathname;
     if (path.startsWith('/art')) return 'art';
     if (path.startsWith('/stems')) return 'stems';
-    if (path.startsWith('/misc')) return 'misc';
-    if (path.startsWith('/fakes')) return 'fakes';
+if (path.startsWith('/fakes')) return 'fakes';
     if (path.startsWith('/released')) return 'released';
     if (path.startsWith('/related')) return 'related';
     if (path.startsWith('/recent')) return 'recent';
@@ -621,7 +618,7 @@ export default function App() {
         // Rebuild each category object in the same key-insertion order so that
         // renaming an era (e.g. "TurboGrafx 16" → "Turbo Grafx 16") does NOT
         // move it to the end of the object and break the display order.
-        const categoriesToNormalize = ['eras', 'art', 'misc', 'stems', 'fakes', 'reference_track'];
+        const categoriesToNormalize = ['eras', 'art', 'stems', 'fakes', 'reference_track'];
         categoriesToNormalize.forEach(category => {
           if (!json[category]) return;
           const rebuilt: Record<string, any> = {};
@@ -817,8 +814,6 @@ export default function App() {
           setActiveCategory('art');
         } else if (path.startsWith('/stems')) {
           setActiveCategory('stems');
-        } else if (path.startsWith('/misc')) {
-          setActiveCategory('misc');
         } else if (path.startsWith('/fakes')) {
           setActiveCategory('fakes');
         } else if (path.startsWith('/released')) {
@@ -914,13 +909,6 @@ export default function App() {
         console.error("Failed to fetch Stems data:", err);
       });
 
-    axios.get('/api/misc')
-      .then(res => {
-        setMiscData(normalizeEraField(res.data) as MiscEntry[]);
-      })
-      .catch(err => {
-        console.error("Failed to fetch Misc data:", err);
-      });
 
     axios.get('/api/released')
       .then(res => {
@@ -1017,10 +1005,6 @@ export default function App() {
     } else if (activeCategory === 'stems') {
       if (!currentPath.startsWith('/stems')) {
         window.history.pushState({ category: 'stems' }, '', '/stems');
-      }
-    } else if (activeCategory === 'misc') {
-      if (!currentPath.startsWith('/misc')) {
-        window.history.pushState({ category: 'misc' }, '', '/misc');
       }
     } else if (activeCategory === 'fakes') {
       if (!currentPath.startsWith('/fakes')) {
@@ -1131,8 +1115,6 @@ export default function App() {
         setActiveCategory('art');
       } else if (path.startsWith('/stems')) {
         setActiveCategory('stems');
-      } else if (path.startsWith('/misc')) {
-        setActiveCategory('misc');
       } else if (path.startsWith('/released')) {
         setActiveCategory('released');
       } else if (path.startsWith('/recent')) {
@@ -2219,7 +2201,7 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
           <div className="flex-1">
             <AnimatePresence mode="wait">
               {activeCategory === 'settings' ? (
-                <SettingsView key="settings" onCategoryChange={setActiveCategory} searchQuery={searchQuery} eras={erasArray} artData={artData} stemsData={stemsData} miscData={miscData} />
+                <SettingsView key="settings" onCategoryChange={setActiveCategory} searchQuery={searchQuery} eras={erasArray} artData={artData} stemsData={stemsData} />
               ) : activeCategory === 'history' ? (
                 <HistoryView key="history" searchQuery={searchQuery} filters={filters} eras={erasArray} historyData={recentData} />
               ) : activeCategory === 'art' ? (
@@ -2240,23 +2222,6 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
                   toggleFavorite={toggleFavorite}
                   favoriteKeys={favoriteKeys}
                 />
-              ) : activeCategory === 'misc' ? (
-                <MiscView
-                  key="misc"
-                  eras={erasArray}
-                  miscData={miscData}
-                  searchQuery={searchQuery}
-                  filters={filters}
-                  onPlaySong={handlePlaySong}
-                  currentSong={currentSong}
-                  isPlaying={isPlaying}
-                  mvData={mvData}
-                  remixData={remixData}
-                  samplesData={samplesData}
-                  toggleFavorite={toggleFavorite}
-                  favoriteKeys={favoriteKeys}
-                />
-
               ) : activeCategory === 'tracklists' && selectedAlbum ? (
                 <TracklistsView
                   key={`tracklists-${selectedAlbum.name}`}

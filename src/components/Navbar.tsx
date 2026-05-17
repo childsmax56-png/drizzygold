@@ -7,7 +7,7 @@ import { SearchFilters } from '../types';
 import { isLastfmLoggedIn, getLastfmUsername, clearLastfmSession, startLastfmAuth } from '../lastfm';
 import { useSettings } from '../SettingsContext';
 
-export type Category = 'music' | 'art' | 'recent' | 'stems' | 'misc' | 'fakes' | 'related' | 'settings' | 'history' | 'tracklists' | 'released' | 'videos';
+export type Category = 'music' | 'art' | 'recent' | 'stems' | 'fakes' | 'related' | 'settings' | 'history' | 'tracklists' | 'released' | 'videos';
 
 interface NavbarProps {
   searchQuery: string;
@@ -30,7 +30,6 @@ const NAV_CATEGORIES: { key: Category; label: string }[] = [
   { key: 'music', label: 'Music' },
   { key: 'art', label: 'Art' },
   { key: 'stems', label: 'Stems' },
-  { key: 'misc', label: 'Misc' },
   { key: 'fakes', label: 'Fakes' },
   { key: 'released', label: 'Released' },
   { key: 'related', label: 'Related' },
