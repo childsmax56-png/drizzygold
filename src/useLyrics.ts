@@ -135,14 +135,9 @@ export function useLyrics(currentSong: Song | null, era: Era | null) {
       let trackNamesToTry = getAlternativeNames(currentSong);
       let artistsToTry = [initialArtist];
 
-      if (currentSong.name === "Alright but the beat is Father Stretch My Hands Pt. 1") {
-        artistsToTry = ["Kendrick Lamar"];
-        trackNamesToTry = ["Alright"];
-      } else {
-        const lowerArtist = initialArtist.toLowerCase();
-        if (!lowerArtist.includes('kanye west') && !lowerArtist.includes('ye')) {
-          artistsToTry.push('Kanye West', 'Ye');
-        }
+      const lowerArtist = initialArtist.toLowerCase();
+      if (!lowerArtist.includes('drake') && !lowerArtist.includes('drizzy')) {
+        artistsToTry.push('Drake');
       }
 
       let foundLyrics = false;
