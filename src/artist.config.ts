@@ -70,7 +70,7 @@ export const ALBUM_RELEASE_DATES: Record<string, string> = {
   "Unknown":                              "??/??/????",
 };
 
-export const HIDDEN_ALBUMS: string[] = [];
+export const HIDDEN_ALBUMS: string[] = ["Unknown"];
 
 export const ALBUM_DESCRIPTIONS: Record<string, string> = {};
 
