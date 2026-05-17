@@ -10,19 +10,20 @@ import { PlayerBar } from './components/PlayerBar';
 import { FullScreenPlayer } from './components/FullScreenPlayer';
 import { ArtGallery, ArtEntry } from './components/ArtGallery';
 import { StemsView, StemEntry } from './components/StemsView';
+import { MiscView, MiscEntry } from './components/MiscView';
 import { TracklistsView, TracklistAlbum } from './components/TracklistsView';
 import { QueueModal } from './components/QueueModal';
 import { handleShareSilent } from './components/EraDetail';
 
 import { TrackerData, Era, Song, SearchFilters } from './types';
 import { matchesFilters, createSlug, getSongSlug, getCleanSongNameWithTags, isSongNotAvailable, formatTextForNotification, CUSTOM_IMAGES, HIDDEN_ALBUMS, ALBUM_RELEASE_DATES, getArtistName, buildArtistTag, handleDownloadFile } from './utils';
-import { CUSTOM_ALBUM_INFO, ERA_MAPPINGS as CONFIG_ERA_MAPPINGS } from './artist.config';
 import { isLastfmLoggedIn, saveLastfmSession, clearLastfmSession, scrobbleTrack, updateNowPlaying, cleanTrackName, parseArtistFromSong, cleanAlbumName } from './lastfm';
 import { isSpotifyLoggedIn, clearSpotifySession, startSpotifyAuth, handleSpotifyCallback } from './spotify';
 import { useSpotify, SpotifyTrack } from './useSpotify';
 import { useYoutube } from './useYoutube';
 import { useSoundCloud } from './useSoundCloud';
 
+const CUSTOM_ALBUM_INFO: Record<string, string[]> = {};
 
 export interface MvEntry {
   Era: string;
@@ -74,7 +75,7 @@ import { ChatBubble } from './components/ChatBubble';
 import { useSettings, LOADING_SCREENS } from './SettingsContext';
 import { recordListeningHistory } from './history';
 
-const ERA_MAPPINGS = CONFIG_ERA_MAPPINGS;
+const ERA_MAPPINGS: Record<string, string> = {};
 
 export default function App() {
   const { settings } = useSettings();
@@ -90,7 +91,8 @@ export default function App() {
   const [artData, setArtData] = useState<ArtEntry[]>([]);
   const [recentData, setRecentData] = useState<Song[]>([]);
   const [stemsData, setStemsData] = useState<StemEntry[]>([]);
-const [fakesData, setFakesData] = useState<FakesEntry[]>([]);
+  const [miscData, setMiscData] = useState<MiscEntry[]>([]);
+  const [fakesData, setFakesData] = useState<FakesEntry[]>([]);
   const [tracklistsData, setTracklistsData] = useState<TracklistAlbum[]>([]);
   const [releasedData, setReleasedData] = useState<ReleasedEntry[]>([]);
   const [videosData, setVideosData] = useState<VideoRawEntry[]>([]);
@@ -107,7 +109,8 @@ const [fakesData, setFakesData] = useState<FakesEntry[]>([]);
     const path = window.location.pathname;
     if (path.startsWith('/art')) return 'art';
     if (path.startsWith('/stems')) return 'stems';
-if (path.startsWith('/fakes')) return 'fakes';
+    if (path.startsWith('/misc')) return 'misc';
+    if (path.startsWith('/fakes')) return 'fakes';
     if (path.startsWith('/released')) return 'released';
     if (path.startsWith('/related')) return 'related';
     if (path.startsWith('/recent')) return 'recent';
@@ -182,16 +185,11 @@ if (path.startsWith('/fakes')) return 'fakes';
   const [isShuffle, setIsShuffle] = useState(settings.startupShuffle);
   const [shuffledQueue, setShuffledQueue] = useState<number[]>([]);
   const [loopMode, setLoopMode] = useState(settings.startupLoop || 0);
-
-  const isShuffleRef = useRef(settings.startupShuffle);
-  const currentSongIndexRef = useRef(-1);
-  const playlistRef = useRef<Song[]>([]);
-  const randomSongRef = useRef<() => void>(() => {});
   const [hasLoopedOnce, setHasLoopedOnce] = useState(false);
 
   const [favoriteKeys, setFavoriteKeys] = useState<{ songName: string, eraName: string, url: string, song?: Song }[]>(() => {
     if (typeof localStorage !== 'undefined') {
-      const saved = localStorage.getItem('drizzygold_favorite_keys');
+      const saved = localStorage.getItem('vampgold_favorite_keys');
       if (saved) {
         try {
           return JSON.parse(saved);
@@ -205,7 +203,7 @@ if (path.startsWith('/fakes')) return 'fakes';
 
   useEffect(() => {
     if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('drizzygold_favorite_keys', JSON.stringify(favoriteKeys));
+      localStorage.setItem('vampgold_favorite_keys', JSON.stringify(favoriteKeys));
     }
   }, [favoriteKeys]);
 
@@ -240,7 +238,7 @@ if (path.startsWith('/fakes')) return 'fakes';
     }
     if (typeof localStorage !== 'undefined') {
       try {
-        const saved = localStorage.getItem('drizzygold_playback_state');
+        const saved = localStorage.getItem('vampgold_playback_state');
         if (saved) {
           const parsed = JSON.parse(saved);
           if (typeof parsed.volume === 'number' && parsed.volume >= 0 && parsed.volume <= 1) {
@@ -277,7 +275,7 @@ if (path.startsWith('/fakes')) return 'fakes';
         volume: volume,
         currentTime: currentTime
       };
-      localStorage.setItem('drizzygold_playback_state', JSON.stringify(stateToSave));
+      localStorage.setItem('vampgold_playback_state', JSON.stringify(stateToSave));
     }
   }, [currentSong, currentEra, volume, currentTime]);
 
@@ -285,7 +283,7 @@ if (path.startsWith('/fakes')) return 'fakes';
     if (data && recentData.length > 0 && !initialLoadRef.current) {
       initialLoadRef.current = true;
       if (typeof localStorage !== 'undefined') {
-        const saved = localStorage.getItem('drizzygold_playback_state');
+        const saved = localStorage.getItem('vampgold_playback_state');
         if (saved) {
           try {
             const parsed = JSON.parse(saved);
@@ -322,7 +320,7 @@ if (path.startsWith('/fakes')) return 'fakes';
                   handlePlaySong(songToRestore as Song, eraToRestore as Era, undefined, false, false);
                 }
               } else if (savedEraName === 'Favorites') {
-                const savedFavs = localStorage.getItem('drizzygold_favorite_keys');
+                const savedFavs = localStorage.getItem('vampgold_favorite_keys');
                 if (savedFavs) {
                    const favKeys = JSON.parse(savedFavs);
                    const favEra = {
@@ -380,10 +378,6 @@ if (path.startsWith('/fakes')) return 'fakes';
   const audioRef = useRef<HTMLAudioElement>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
-
-  isShuffleRef.current = isShuffle;
-  currentSongIndexRef.current = currentSongIndex;
-  playlistRef.current = playlist;
 
   useEffect(() => {
     if (audioRef.current) {
@@ -574,18 +568,14 @@ if (path.startsWith('/fakes')) return 'fakes';
     });
   }
 
-  const HARDCODED_SHEET_ID = ''; // Set to your Drake tracker Google Sheet ID
-  const HARDCODED_SHEET_GID = ''; // Set to the Recent tab GID
+  const HARDCODED_SHEET_ID = '12nGHPPh5dVTfLuBLVQYzC3QgPxKfvp-jgCoNccvEasM';
+  const HARDCODED_SHEET_GID = '1385926980'; // Recent tab
 
   useEffect(() => {
-    const sheetCsvUrl = HARDCODED_SHEET_ID
-      ? getSheetCsvExportUrl(
-          settings.googleSheetsUrl || `https://docs.google.com/spreadsheets/d/${HARDCODED_SHEET_ID}/edit#gid=${HARDCODED_SHEET_GID}`
-        )
-      : null;
-    const recentTabCsvUrl = HARDCODED_SHEET_ID
-      ? `https://docs.google.com/spreadsheets/d/${HARDCODED_SHEET_ID}/export?format=csv&gid=${HARDCODED_SHEET_GID}`
-      : null;
+    const sheetCsvUrl = getSheetCsvExportUrl(
+      settings.googleSheetsUrl || `https://docs.google.com/spreadsheets/d/${HARDCODED_SHEET_ID}/edit#gid=${HARDCODED_SHEET_GID}`
+    );
+    const recentTabCsvUrl = `https://docs.google.com/spreadsheets/d/${HARDCODED_SHEET_ID}/export?format=csv&gid=${HARDCODED_SHEET_GID}`;
 
     const FETCH_TIMEOUT = 20000;
     Promise.all([
@@ -595,22 +585,18 @@ if (path.startsWith('/fakes')) return 'fakes';
         console.error("Failed to fetch local songs", err);
         return { data: [] };
       }),
-      sheetCsvUrl
-        ? axios.get(`/api/sheets-proxy?url=${encodeURIComponent(sheetCsvUrl)}`, { timeout: FETCH_TIMEOUT }).catch(err => {
-            console.error("Failed to fetch Google Sheets data", err);
-            return { data: [] };
-          })
-        : Promise.resolve({ data: [] }),
+      axios.get(`/api/sheets-proxy?url=${encodeURIComponent(sheetCsvUrl!)}`, { timeout: FETCH_TIMEOUT }).catch(err => {
+        console.error("Failed to fetch Google Sheets data", err);
+        return { data: [] };
+      }),
       axios.get('/api/recent', { timeout: FETCH_TIMEOUT }).catch(err => {
         console.error("Failed to fetch Recent data:", err);
         return { data: [] };
       }),
-      recentTabCsvUrl
-        ? axios.get(`/api/sheets-proxy?url=${encodeURIComponent(recentTabCsvUrl)}`, { timeout: FETCH_TIMEOUT }).catch(err => {
-            console.error("Failed to fetch Recent tab data", err);
-            return { data: [] };
-          })
-        : Promise.resolve({ data: [] }),
+      axios.get(`/api/sheets-proxy?url=${encodeURIComponent(recentTabCsvUrl)}`, { timeout: FETCH_TIMEOUT }).catch(err => {
+        console.error("Failed to fetch Recent tab data", err);
+        return { data: [] };
+      }),
     ])
       .then(([mainRes, mykRes, localRes, sheetsRes, recentRes, recentTabRes]) => {
         const rawJson = mainRes.data;
@@ -619,7 +605,7 @@ if (path.startsWith('/fakes')) return 'fakes';
         // Rebuild each category object in the same key-insertion order so that
         // renaming an era (e.g. "TurboGrafx 16" → "Turbo Grafx 16") does NOT
         // move it to the end of the object and break the display order.
-        const categoriesToNormalize = ['eras', 'art', 'stems', 'fakes', 'reference_track'];
+        const categoriesToNormalize = ['eras', 'art', 'misc', 'stems', 'fakes', 'reference_track'];
         categoriesToNormalize.forEach(category => {
           if (!json[category]) return;
           const rebuilt: Record<string, any> = {};
@@ -815,6 +801,8 @@ if (path.startsWith('/fakes')) return 'fakes';
           setActiveCategory('art');
         } else if (path.startsWith('/stems')) {
           setActiveCategory('stems');
+        } else if (path.startsWith('/misc')) {
+          setActiveCategory('misc');
         } else if (path.startsWith('/fakes')) {
           setActiveCategory('fakes');
         } else if (path.startsWith('/released')) {
@@ -877,7 +865,13 @@ if (path.startsWith('/fakes')) return 'fakes';
       });
     };
 
-    // MV data loaded from /api/music-videos only
+    axios.get('/api/music-videos')
+      .then(res => {
+        setMvData(normalizeEraField(res.data) as MvEntry[]);
+      })
+      .catch(err => {
+        console.error("Failed to fetch MV data:", err);
+      });
 
     axios.get('/api/music-videos')
       .then(res => {
@@ -887,7 +881,13 @@ if (path.startsWith('/fakes')) return 'fakes';
         console.error("Failed to fetch music videos data:", err);
       });
 
-    // Remix data not yet sourced for DRIZZYGOLD
+    Promise.resolve({ data: [] })
+      .then(res => {
+        setRemixData(normalizeEraField(res.data) as RemixEntry[]);
+      })
+      .catch(err => {
+        console.error("Failed to fetch Remix data:", err);
+      });
 
     axios.get('/api/art')
       .then(res => {
@@ -910,6 +910,13 @@ if (path.startsWith('/fakes')) return 'fakes';
         console.error("Failed to fetch Stems data:", err);
       });
 
+    axios.get('/api/misc')
+      .then(res => {
+        setMiscData(normalizeEraField(res.data) as MiscEntry[]);
+      })
+      .catch(err => {
+        console.error("Failed to fetch Misc data:", err);
+      });
 
     axios.get('/api/released')
       .then(res => {
@@ -955,9 +962,15 @@ if (path.startsWith('/fakes')) return 'fakes';
         console.error("Failed to fetch Fakes data:", err);
       });
 
-    // Samples data not yet sourced for DRIZZYGOLD
+    Promise.resolve({ data: [] })
+      .then(res => {
+        setSamplesData(res.data as SampleEntry[]);
+      })
+      .catch(err => {
+        console.error("Failed to fetch Samples data:", err);
+      });
 
-    axios.get('/api/tracklists')
+    axios.get('/Tracklists.json')
       .then(res => {
         setTracklistsData(res.data as TracklistAlbum[]);
       })
@@ -968,7 +981,7 @@ if (path.startsWith('/fakes')) return 'fakes';
     const userAgent = navigator.userAgent.toLowerCase();
     const isBrowserSafari = userAgent.includes('safari') && !userAgent.includes('chrome') && !userAgent.includes('crios') && !userAgent.includes('android');
 
-    if (!localStorage.getItem('v1_9_seen')) {
+    if (!localStorage.getItem('v1_8_5_seen')) {
       setShowChangelog(true);
     } else if (isBrowserSafari) {
       setShowSafariWarning(true);
@@ -983,6 +996,14 @@ if (path.startsWith('/fakes')) return 'fakes';
       window.history.replaceState({}, '', window.location.pathname);
     }
 
+    const handleLastfmMessage = (e: MessageEvent) => {
+      if (e.data?.type === 'lastfm-auth' && e.data.session && e.data.user) {
+        saveLastfmSession(e.data.session, e.data.user);
+        setLastfmLoggedIn(true);
+      }
+    };
+    window.addEventListener('message', handleLastfmMessage);
+
     const handleLastfmApiError = () => {
       setShowLastfmErrorModal(true);
       clearLastfmSession();
@@ -991,6 +1012,7 @@ if (path.startsWith('/fakes')) return 'fakes';
 
     window.addEventListener('lastfm-api-error', handleLastfmApiError);
     return () => {
+      window.removeEventListener('message', handleLastfmMessage);
       window.removeEventListener('lastfm-api-error', handleLastfmApiError);
     };
   }, []);
@@ -1006,6 +1028,10 @@ if (path.startsWith('/fakes')) return 'fakes';
     } else if (activeCategory === 'stems') {
       if (!currentPath.startsWith('/stems')) {
         window.history.pushState({ category: 'stems' }, '', '/stems');
+      }
+    } else if (activeCategory === 'misc') {
+      if (!currentPath.startsWith('/misc')) {
+        window.history.pushState({ category: 'misc' }, '', '/misc');
       }
     } else if (activeCategory === 'fakes') {
       if (!currentPath.startsWith('/fakes')) {
@@ -1116,6 +1142,8 @@ if (path.startsWith('/fakes')) return 'fakes';
         setActiveCategory('art');
       } else if (path.startsWith('/stems')) {
         setActiveCategory('stems');
+      } else if (path.startsWith('/misc')) {
+        setActiveCategory('misc');
       } else if (path.startsWith('/released')) {
         setActiveCategory('released');
       } else if (path.startsWith('/recent')) {
@@ -1194,11 +1222,6 @@ if (path.startsWith('/fakes')) return 'fakes';
         } else if (rawUrl.includes('pillows.su/f/')) {
           const id = rawUrl.split('/f/')[1];
           streamUrl = `https://api.pillows.su/api/get/${id}`;
-          const headRes = await fetch(streamUrl, { method: 'HEAD' });
-          const contentType = headRes.headers.get('content-type') || '';
-          if (!contentType.startsWith('audio/') && !contentType.startsWith('video/')) {
-            isPlayable = false;
-          }
         }
 
       } catch (err) {
@@ -1347,25 +1370,23 @@ if (path.startsWith('/fakes')) return 'fakes';
   }, [selectedAlbum, currentSong]);
 
   const playNext = () => {
-    const pl = playlistRef.current;
-    const idx = currentSongIndexRef.current;
-    const shuffle = isShuffleRef.current;
-    if (pl.length === 0 || !currentEra) return;
-    let nextIndex = idx + 1;
-    if (shuffle && pl.length > 1) {
-      let randomIndex;
-      do {
-        randomIndex = Math.floor(Math.random() * pl.length);
-      } while (randomIndex === idx);
-      nextIndex = randomIndex;
-    } else if (nextIndex >= pl.length) {
+    if (playlist.length === 0 || !currentEra) return;
+    let nextIndex = currentSongIndex + 1;
+    if (isShuffle && shuffledQueue.length > 0) {
+      const idx = shuffledQueue.indexOf(currentSongIndex);
+      if (idx !== -1 && idx < shuffledQueue.length - 1) {
+        nextIndex = shuffledQueue[idx + 1];
+      } else {
+        nextIndex = shuffledQueue[0];
+      }
+    } else if (nextIndex >= playlist.length) {
       nextIndex = 0;
     }
 
-    const nextSong = pl[nextIndex];
+    const nextSong = playlist[nextIndex];
     if (nextSong) {
       const eraToPass = (nextSong as any).realEra || currentEra;
-      handlePlaySong(nextSong, eraToPass, pl, false, true, isRandomMode);
+      handlePlaySong(nextSong, eraToPass, playlist, false, true, isRandomMode);
     }
   };
 
@@ -1414,8 +1435,6 @@ if (path.startsWith('/fakes')) return 'fakes';
         setHasLoopedOnce(false);
         playNext();
       }
-    } else if (isShuffleRef.current) {
-      randomSongRef.current();
     } else {
       playNext();
     }
@@ -1553,7 +1572,7 @@ if (path.startsWith('/fakes')) return 'fakes';
         const isFake = currentSong.name.endsWith('[Fake Leak]') || (currentEra?.name || '').includes('Fake');
         const isStems = currentSong.name.endsWith('[Stems]') || (currentEra?.name || '').includes('Stems');
         const isMisc = currentSong.name.endsWith('[Misc]') || (currentEra?.name || '').includes('Misc');
-        if (!isFake && !isStems && !isMisc) {
+        if (currentSong.name !== "Kanye West/Kendrick Lamar/QoQinox - Alright but the beat is Father Stretch My Hands Pt. 1" && !isFake && !isStems && !isMisc) {
           toggleFavorite(currentSong, currentEra?.name || '');
         }
       } else if (e.code === 'KeyD' && currentSong && !isPlayerClosed) {
@@ -1579,15 +1598,15 @@ if (path.startsWith('/fakes')) return 'fakes';
   useEffect(() => {
     const handleEasterEgg = () => {
       const easterEggSong: Song = {
-        name: "Kendrick Lamar - HUMBLE.",
-        url: "",
+        name: "Kanye West/Kendrick Lamar/QoQinox - Alright but the beat is Father Stretch My Hands Pt. 1",
+        url: "https://pillows.su/f/995251ad1569bf2e298af3e8c6a3bed8",
         extra: "Easter Egg",
-        description: "",
-        quality: "OG File"
+        description: "Fire Song",
+        quality: "Lossless"
       };
       const easterEggEra: Era = {
         name: "Easter egg",
-        image: "",
+        image: "https://i.imagesup.co/images2/36f0a02c25b5e237dc6ca3762a3453d4b6ff36f7.jpg",
         data: {},
       };
       handlePlaySong(easterEggSong, easterEggEra, [easterEggSong], true);
@@ -1805,21 +1824,12 @@ if (path.startsWith('/fakes')) return 'fakes';
     );
   }
 
-const ERA_ORDER_KEYS = Object.keys(ALBUM_RELEASE_DATES);
 let erasArray = (Object.values(data.eras || {}) as Era[])
   .filter(era => !HIDDEN_ALBUMS.includes(era.name))
   .map(era => ({
     ...era,
     fileInfo: CUSTOM_ALBUM_INFO[era.name] || era.fileInfo
-  }))
-  .sort((a, b) => {
-    const ai = ERA_ORDER_KEYS.indexOf(a.name);
-    const bi = ERA_ORDER_KEYS.indexOf(b.name);
-    if (ai === -1 && bi === -1) return 0;
-    if (ai === -1) return 1;
-    if (bi === -1) return -1;
-    return ai - bi;
-  }) as Era[];
+  })) as Era[];
 
 let relatedErasArray = (Object.values(data.eras || {}) as Era[])
   .filter(era => HIDDEN_ALBUMS.includes(era.name))
@@ -1827,21 +1837,6 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
     ...era,
     fileInfo: CUSTOM_ALBUM_INFO[era.name] || era.fileInfo
   })) as Era[];
-
-// Order in Related tab: K.T.S.E. → Jesus Is Born → Sunday Service Choir → The Elementary School Dropout
-{
-  const jibIdx = relatedErasArray.findIndex(e => e.name === "Jesus Is Born");
-  const sscIdx = relatedErasArray.findIndex(e => e.name === "Sunday Service Choir");
-
-  const toInsert: Era[] = [];
-  if (jibIdx !== -1) toInsert.push(relatedErasArray[jibIdx]);
-  if (sscIdx !== -1) toInsert.push(relatedErasArray[sscIdx]);
-  [jibIdx, sscIdx].filter(i => i !== -1).sort((a, b) => b - a).forEach(i => relatedErasArray.splice(i, 1));
-
-  // Reinsert after K.T.S.E.
-  const anchor = relatedErasArray.findIndex(e => e.name === "K.T.S.E.");
-  if (anchor !== -1 && toInsert.length > 0) relatedErasArray.splice(anchor + 1, 0, ...toInsert);
-}
 
 // Turbo Grafx 16 and Wolves can end up out of position (Turbo gets renamed from
 // "TurboGrafx 16" via ERA_MAPPINGS, Wolves may be appended after myk merge).
@@ -1875,15 +1870,6 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
   }
 }
 
-// Ongoing should always be the last era. Re-pin it in case it shifted.
-{
-  const ongoingIdx = erasArray.findIndex(e => e.name === "Ongoing");
-  if (ongoingIdx !== -1 && ongoingIdx !== erasArray.length - 1) {
-    const ongoingEra = erasArray[ongoingIdx];
-    erasArray.splice(ongoingIdx, 1);
-    erasArray.push(ongoingEra);
-  }
-}
 
 
   const favoritesEra: Era | null = favoriteKeys.length > 0 ? {
@@ -2068,8 +2054,6 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
     handlePlaySong(randomSong, randomSong.realEra, contextPlaylist, true, true, true);
   };
 
-  randomSongRef.current = handleRandomSongClick;
-
   const isSpotifyActive = activePlayer === 'spotify';
   const isYoutubeActive = activePlayer === 'youtube';
   const isSoundCloudActive = activePlayer === 'soundcloud';
@@ -2204,7 +2188,7 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
           <div className="flex-1">
             <AnimatePresence mode="wait">
               {activeCategory === 'settings' ? (
-                <SettingsView key="settings" onCategoryChange={setActiveCategory} searchQuery={searchQuery} eras={erasArray} artData={artData} stemsData={stemsData} />
+                <SettingsView key="settings" onCategoryChange={setActiveCategory} searchQuery={searchQuery} eras={erasArray} artData={artData} stemsData={stemsData} miscData={miscData} />
               ) : activeCategory === 'history' ? (
                 <HistoryView key="history" searchQuery={searchQuery} filters={filters} eras={erasArray} historyData={recentData} />
               ) : activeCategory === 'art' ? (
@@ -2225,6 +2209,23 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
                   toggleFavorite={toggleFavorite}
                   favoriteKeys={favoriteKeys}
                 />
+              ) : activeCategory === 'misc' ? (
+                <MiscView
+                  key="misc"
+                  eras={erasArray}
+                  miscData={miscData}
+                  searchQuery={searchQuery}
+                  filters={filters}
+                  onPlaySong={handlePlaySong}
+                  currentSong={currentSong}
+                  isPlaying={isPlaying}
+                  mvData={mvData}
+                  remixData={remixData}
+                  samplesData={samplesData}
+                  toggleFavorite={toggleFavorite}
+                  favoriteKeys={favoriteKeys}
+                />
+
               ) : activeCategory === 'tracklists' && selectedAlbum ? (
                 <TracklistsView
                   key={`tracklists-${selectedAlbum.name}`}
@@ -2322,10 +2323,20 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
 
           <div className="mt-auto px-6 py-8 text-center border-t border-white/5">
             <p className="text-[10px] text-white/30 leading-relaxed">
-              DRIZZYGOLD does not host or hold any illegal files. All links are external and provided as-is for educational and archival purposes only.
+              VAMPGOLD does not host or hold any illegal files. All links are external and provided as-is for educational and archival purposes only.
             </p>
             <p className="text-[10px] text-white/30 leading-relaxed">
-              DRIZZYGOLD 2026 ©
+              VAMPGOLD 2026 ©
+            </p>
+            <p className="text-[10px] text-white/30 leading-relaxed mt-1">
+              Logo created by Nr7th on discord
+            </p>
+            <p className="text-[10px] text-white/30 leading-relaxed mt-1 space-x-3">
+              <a href="https://discord.gg/TYqdey3B" target="_blank" rel="noopener noreferrer" className="text-[var(--theme-color)]/50 hover:text-[var(--theme-color)] transition-colors underline">Discord</a>
+              <span>·</span>
+              <a href="https://docs.google.com/document/d/1b8aidNuSLLHfzgzrJ0uGdWHPuo-uNk6wI21Vscwzid4/edit?tab=t.0#heading=h.coxp3mvb86xr" target="_blank" rel="noopener noreferrer" className="text-[var(--theme-color)]/50 hover:text-[var(--theme-color)] transition-colors underline">Changelog</a>
+              <span>·</span>
+              <a href="https://docs.google.com/spreadsheets/d/12nGHPPh5dVTfLuBLVQYzC3QgPxKfvp-jgCoNccvEasM/" target="_blank" rel="noopener noreferrer" className="text-[var(--theme-color)]/50 hover:text-[var(--theme-color)] transition-colors underline">Link For The Sheet</a>
             </p>
           </div>
         </main>
@@ -2493,7 +2504,7 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
               
               <div className="space-y-4 mb-8 text-sm text-white/70 leading-relaxed font-medium">
                 <p>
-                  The Last.fm API keys have been rotated. Please log off and log back in to your Last.fm account.
+                  Vercel (The Hosting of yzygold) had a data breach, including my last.fm api keys! I needed to reset the keys, and now the old last.fm api key that you are using is not working!
                 </p>
                 <p>
                   dont worry, you are not infected, and the site is not infected. Passwords from last.fm are protected.
@@ -2526,40 +2537,26 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
               className="bg-[#111] border border-white/10 rounded-xl max-w-lg w-full p-6 md:p-8"
             >
               <h2 className="text-2xl font-bold text-white mb-1 tracking-tight font-display">
-                Version 1.9
+                Version 1.8.5
               </h2>
               <p className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-6">What's New</p>
 
               <div className="space-y-4 mb-8 text-sm text-white/70 leading-relaxed">
                 <ul className="space-y-4">
                   <li>
-                    <strong className="text-white">Music videos tab</strong>
-                    <br />View, watch, and download music videos in the new "videos tab"
-                  </li>
-                  <li>
-                    <strong className="text-white">YE-I chatbot assistant</strong>
-                    <br />A new AI chat bot you can ask questions about the site
-                  </li>
-                  <li>
-                    <strong className="text-white">And a lot more smaller additions</strong>
-                    <br />All of which can be viewed in the{' '}
-                    <a href="https://docs.google.com/document/d/1b8aidNuSLLHfzgzrJ0uGdWHPuo-uNk6wI21Vscwzid4/edit?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-[var(--theme-color)] hover:underline">
-                      change log
-                    </a>
+                    <strong className="text-white">Thank you to Nr7th on discord for creating the new YZYgold logo, YOU DID A GREAT JOB</strong>
                   </li>
                 </ul>
 
                 <div className="border-t border-white/10 pt-4 space-y-2 text-white/50 text-xs">
-                  <p className="text-white/70 font-semibold uppercase tracking-wider text-xs">
-                    COME BACK TO THE SITE SUNDAY FOR A BIG ANNOUNCEMENT
+                  <p>
+                    <a href="https://docs.google.com/document/d/1b8aidNuSLLHfzgzrJ0uGdWHPuo-uNk6wI21Vscwzid4/edit?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-[var(--theme-color)] hover:underline">
+                      Full changelog here
+                    </a>
                   </p>
                   <p>
                     <a href="https://discord.gg/TYqdey3B" target="_blank" rel="noopener noreferrer" className="text-[var(--theme-color)] hover:underline">
-                      Join the Discord
-                    </a>
-                    {' · '}
-                    <a href="https://docs.google.com/document/d/1b8aidNuSLLHfzgzrJ0uGdWHPuo-uNk6wI21Vscwzid4/edit?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-[var(--theme-color)] hover:underline">
-                      Changelog
+                      Join the Discord here
                     </a>
                   </p>
                 </div>
@@ -2568,7 +2565,7 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
               <button
                 onClick={() => {
                   setShowChangelog(false);
-                  localStorage.setItem('v1_9_seen', 'true');
+                  localStorage.setItem('v1_8_5_seen', 'true');
 
                   const userAgent = navigator.userAgent.toLowerCase();
                   const isBrowserSafari = userAgent.includes('safari') && !userAgent.includes('chrome') && !userAgent.includes('crios') && !userAgent.includes('android');
