@@ -4,5 +4,6 @@ dist/
 .env.local
 .claude/
 .claire/
+.wrangler/
 *.xlsx
 *.DS_Store
