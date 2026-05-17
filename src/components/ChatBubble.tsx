@@ -173,12 +173,9 @@ export function ChatBubble({ data, screenContext, showPlayer, open, onOpenChange
             }}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#181818]">
-              <div className="flex items-center gap-3">
-                <img src="https://i.ibb.co/TMFsFsSp/YE-I-01.png" alt="YE-I" className="w-9 h-9 rounded-full object-cover bg-black" />
-                <div>
-                  <p className="text-white text-sm font-semibold leading-tight">YE-I</p>
-                  <p className="text-white/40 text-[10px]">Ask anything about Ye's music</p>
-                </div>
+              <div>
+                <p className="text-white text-sm font-semibold leading-tight">DRIZZYGOLD Assistant</p>
+                <p className="text-white/40 text-[10px]">Ask anything about Drake's music</p>
               </div>
               <button
                 onClick={() => onOpenChange(false)}
@@ -191,7 +188,7 @@ export function ChatBubble({ data, screenContext, showPlayer, open, onOpenChange
             <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3 min-h-0">
               {messages.length === 0 && (
                 <div className="text-white/30 text-sm text-center py-6 leading-relaxed">
-                  Ask about any Ye song, era, leak, or quality rating.
+                  Ask about any Drake song, era, leak, or quality rating.
                 </div>
               )}
               {messages.map((msg, i) => (

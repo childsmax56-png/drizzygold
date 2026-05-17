@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, DollarSign, LogIn, LogOut, Settings, Dice5, X, ChevronDown } from 'lucide-react';
+import { Search, DollarSign, LogIn, LogOut, Settings, Dice5, X, ChevronDown, MessageCircle } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { SiLastdotfm, SiSpotify, SiDiscord } from 'react-icons/si';
 import { FilterMenu } from './FilterMenu';
@@ -230,12 +230,14 @@ export function Navbar({ searchQuery, setSearchQuery, filters, setFilters, onHom
             </button>
             <button
               onClick={onYEIClick}
-              className={`flex items-center justify-center p-2.5 rounded-full transition-all duration-300 cursor-pointer overflow-hidden ${
-                yeiOpen ? 'bg-white/10' : 'bg-white/5 hover:bg-white/10'
+              className={`flex items-center justify-center p-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                yeiOpen
+                  ? 'bg-[var(--theme-color)]/15 text-[var(--theme-color)]'
+                  : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
               }`}
-              title="Ask YE-I"
+              title="Ask AI about music"
             >
-              <img src="https://i.ibb.co/TMFsFsSp/YE-I-01.png" alt="YE-I" className="w-5 h-5 rounded-full object-cover" />
+              <MessageCircle className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -358,13 +360,13 @@ export function Navbar({ searchQuery, setSearchQuery, filters, setFilters, onHom
           onClick={onYEIClick}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all duration-300 cursor-pointer ${
             yeiOpen
-              ? 'bg-white/10 text-white hover:bg-white/15 hover:scale-105'
+              ? 'bg-[var(--theme-color)]/15 text-[var(--theme-color)] hover:bg-[var(--theme-color)]/25 hover:scale-105'
               : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white hover:scale-105'
           }`}
-          title="Ask YE-I"
+          title="Ask AI about music"
         >
-          <img src="https://i.ibb.co/TMFsFsSp/YE-I-01.png" alt="YE-I" className="w-4 h-4 rounded-full object-cover" />
-          <span className="text-xs font-semibold uppercase tracking-wider whitespace-nowrap">YE-I</span>
+          <MessageCircle className="w-4 h-4" />
+          <span className="text-xs font-semibold uppercase tracking-wider whitespace-nowrap">AI</span>
         </button>
         <button
           onClick={() => {
