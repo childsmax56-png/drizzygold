@@ -65,8 +65,10 @@ function parseStemsToEras(stemsData: StemEntry[], allEras: Era[]): { eraName: st
 
   for (const item of stemsData) {
     const isBrokenEra = typeof item.Era === 'string' && (item.Era.includes('OG File') || item.Era.includes('Unavailable'));
-    const isEraHeader = (isBrokenEra && !!item.Name) || (!item.Era && !!item.Name && (typeof item["Leak Date"] === 'object' || (item["Full Length"] && item["Full Length"].length > 50)));
     const isCategoryHeader = !item.Era && item.Name && !item.Quality && !item["Link(s)"] && CATEGORY_NAMES.includes(item.Name);
+    const isEraHeader = (isBrokenEra && !!item.Name) ||
+      (!item.Era && !!item.Name && (typeof item["Leak Date"] === 'object' || (item["Full Length"] && item["Full Length"].length > 50))) ||
+      (!item.Era && !!item.Name && !item.Quality && !item["Link(s)"] && !isCategoryHeader);
 
     if (isEraHeader && !isCategoryHeader) {
       if (currentEraName && currentCategorySongs.length > 0) {
