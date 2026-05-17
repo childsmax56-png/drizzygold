@@ -12,10 +12,13 @@ export const onRequestGet: PagesFunction = async (context) => {
 
   const filtered = rows.filter(row => {
     const era = (row['Era'] || '').trim();
-    // Skip stats/summary rows that have OG file counts in the Era column
-    if (/\d+\s+OG\s+File/.test(era)) return false;
-    // Skip rows with no Era value
     if (!era) return false;
+    // Skip stats rows: "N OG File(s)..." or "N Full..." patterns
+    if (/^\d+\s+(OG\s+File|Full|Total Links)/.test(era)) return false;
+    // Skip changelog / guideline rows that contain a date in parentheses
+    if (/\(\d{2}\/\d{2}\/\d{4}\)/.test(era)) return false;
+    // Skip rows where Era is clearly a long guideline/note (>80 chars)
+    if (era.length > 80) return false;
     return true;
   });
 

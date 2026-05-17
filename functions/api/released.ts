@@ -1,6 +1,9 @@
 import { parseCSV, csvResponse } from './_csvParser';
 
-const VALID_TYPES = new Set(['Feature', 'Production', 'Single', 'Album Track', 'Other']);
+const VALID_TYPES = new Set([
+  'Feature', 'Production', 'Single', 'Album Track', 'Other',
+  'Mixtape Track', 'Loosie', 'EP Track', 'Compilation Track', 'Remix', 'Physical Release',
+]);
 
 function normalizeRow(row: Record<string, string>): Record<string, string> {
   const out: Record<string, string> = {};
