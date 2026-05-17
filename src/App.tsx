@@ -580,14 +580,18 @@ export default function App() {
     });
   }
 
-  const HARDCODED_SHEET_ID = ''; // Set to your Kendrick tracker Google Sheet ID
+  const HARDCODED_SHEET_ID = ''; // Set to your Drake tracker Google Sheet ID
   const HARDCODED_SHEET_GID = ''; // Set to the Recent tab GID
 
   useEffect(() => {
-    const sheetCsvUrl = getSheetCsvExportUrl(
-      settings.googleSheetsUrl || `https://docs.google.com/spreadsheets/d/${HARDCODED_SHEET_ID}/edit#gid=${HARDCODED_SHEET_GID}`
-    );
-    const recentTabCsvUrl = `https://docs.google.com/spreadsheets/d/${HARDCODED_SHEET_ID}/export?format=csv&gid=${HARDCODED_SHEET_GID}`;
+    const sheetCsvUrl = HARDCODED_SHEET_ID
+      ? getSheetCsvExportUrl(
+          settings.googleSheetsUrl || `https://docs.google.com/spreadsheets/d/${HARDCODED_SHEET_ID}/edit#gid=${HARDCODED_SHEET_GID}`
+        )
+      : null;
+    const recentTabCsvUrl = HARDCODED_SHEET_ID
+      ? `https://docs.google.com/spreadsheets/d/${HARDCODED_SHEET_ID}/export?format=csv&gid=${HARDCODED_SHEET_GID}`
+      : null;
 
     const FETCH_TIMEOUT = 20000;
     Promise.all([
@@ -597,18 +601,22 @@ export default function App() {
         console.error("Failed to fetch local songs", err);
         return { data: [] };
       }),
-      axios.get(`/api/sheets-proxy?url=${encodeURIComponent(sheetCsvUrl!)}`, { timeout: FETCH_TIMEOUT }).catch(err => {
-        console.error("Failed to fetch Google Sheets data", err);
-        return { data: [] };
-      }),
+      sheetCsvUrl
+        ? axios.get(`/api/sheets-proxy?url=${encodeURIComponent(sheetCsvUrl)}`, { timeout: FETCH_TIMEOUT }).catch(err => {
+            console.error("Failed to fetch Google Sheets data", err);
+            return { data: [] };
+          })
+        : Promise.resolve({ data: [] }),
       axios.get('/api/recent', { timeout: FETCH_TIMEOUT }).catch(err => {
         console.error("Failed to fetch Recent data:", err);
         return { data: [] };
       }),
-      axios.get(`/api/sheets-proxy?url=${encodeURIComponent(recentTabCsvUrl)}`, { timeout: FETCH_TIMEOUT }).catch(err => {
-        console.error("Failed to fetch Recent tab data", err);
-        return { data: [] };
-      }),
+      recentTabCsvUrl
+        ? axios.get(`/api/sheets-proxy?url=${encodeURIComponent(recentTabCsvUrl)}`, { timeout: FETCH_TIMEOUT }).catch(err => {
+            console.error("Failed to fetch Recent tab data", err);
+            return { data: [] };
+          })
+        : Promise.resolve({ data: [] }),
     ])
       .then(([mainRes, mykRes, localRes, sheetsRes, recentRes, recentTabRes]) => {
         const rawJson = mainRes.data;

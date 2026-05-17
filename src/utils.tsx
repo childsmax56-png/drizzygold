@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { saveAs } from 'file-saver';
 import { useSettings } from './SettingsContext';
-export { getArtistName, CUSTOM_IMAGES, ALBUM_RELEASE_DATES, HIDDEN_ALBUMS, ALBUM_DESCRIPTIONS, TAG_MAP, TAG_TOOLTIP_MAP } from './artist.config';
+import { getArtistName, CUSTOM_IMAGES, ALBUM_RELEASE_DATES, HIDDEN_ALBUMS, ALBUM_DESCRIPTIONS, TAG_MAP, TAG_TOOLTIP_MAP } from './artist.config';
+export { getArtistName, CUSTOM_IMAGES, ALBUM_RELEASE_DATES, HIDDEN_ALBUMS, ALBUM_DESCRIPTIONS, TAG_MAP, TAG_TOOLTIP_MAP };
 
 
 export const FILTER_TOOLTIPS: Record<string, string> = {
