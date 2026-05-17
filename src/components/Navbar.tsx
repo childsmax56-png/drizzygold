@@ -89,7 +89,7 @@ export function Navbar({ searchQuery, setSearchQuery, filters, setFilters, onHom
               src="/logo.png"
               alt="DRIZZYGOLD"
               onClick={onHomeClick}
-              className="h-[48px] w-[160px] object-contain object-center cursor-pointer hover:opacity-80 transition-opacity duration-300"
+              className="h-[40px] w-[240px] object-contain object-center cursor-pointer hover:opacity-80 transition-opacity duration-300"
             />
           </div>
 
@@ -130,7 +130,7 @@ export function Navbar({ searchQuery, setSearchQuery, filters, setFilters, onHom
                 )}
               </div>
               {/* desktop logo fills the gap between search and center */}
-              <div className="hidden md:block flex-1 h-[64px] overflow-hidden">
+              <div className="hidden md:block flex-1 h-[48px] overflow-hidden">
                 <img
                   src="/logo.png"
                   alt="DRIZZYGOLD"
