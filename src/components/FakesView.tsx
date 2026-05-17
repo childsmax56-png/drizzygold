@@ -19,9 +19,8 @@ interface FakesViewProps {
 }
 
 const ERA_MAPPINGS: Record<string, string> = {
-  "Donda [V1]": "DONDA [V1]",
-  "Bully": "BULLY [V1]",
-  "BULLY": "BULLY [V1]"
+  "FATD": "For All The Dogs",
+  "Ongoing": "ICEMAN",
 };
 
 function parseFakesToEras(fakesData: FakesEntry[], allEras: Era[]) {

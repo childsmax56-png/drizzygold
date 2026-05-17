@@ -37,6 +37,8 @@ export const CUSTOM_IMAGES: Record<string, string> = {
   "$ome $exy $ongs 4 U":                  "https://i.ibb.co/G33GRf3v/SSSFU.jpg",
   "ICEMAN [V1]":                          "https://i.ibb.co/6R3dhyc4/Iceman-V1.webp",
   "ICEMAN [V2]":                          "https://i.ibb.co/Fb33KRt5/Iceman-V2.jpg",
+  "ICEMAN":                               "https://i.ibb.co/Fb33KRt5/Iceman-V2.jpg",
+  "Scorpion":                             "https://i.ibb.co/pjRFZjHR/Scorpion-by-Drake.jpg",
 };
 
 // ORDER MATTERS — determines era sort order on the grid
@@ -76,7 +78,10 @@ export const ALBUM_DESCRIPTIONS: Record<string, string> = {};
 
 export const CUSTOM_ALBUM_INFO: Record<string, string[]> = {};
 
-export const ERA_MAPPINGS: Record<string, string> = {};
+export const ERA_MAPPINGS: Record<string, string> = {
+  "Ongoing": "ICEMAN",
+  "FATD": "For All The Dogs",
+};
 
 export const TAG_MAP: Record<string, string> = {
   "⭐": "Best Of",
