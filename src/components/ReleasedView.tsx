@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, ExternalLink, ChevronDown, ChevronUp, Play } from 'lucide-react';
 import {
@@ -11,6 +11,7 @@ import {
 } from 'react-icons/si';
 import { Era } from '../types';
 import { CUSTOM_IMAGES, ALBUM_DESCRIPTIONS } from '../utils';
+import { searchSpotifyTrack } from '../spotify';
 
 export interface ReleasedEntry {
   Era: string;
@@ -216,6 +217,8 @@ export function ReleasedView({ eras, releasedData, searchQuery, spotifyLoggedIn,
   const [isDescExpanded, setIsDescExpanded] = useState(false);
   // key: `${trackIdx}-${linkIdx}`
   const [openEmbed, setOpenEmbed] = useState<string | null>(null);
+  const [autoSpotifyLinks, setAutoSpotifyLinks] = useState<Record<string, string>>({});
+  const searchedEras = useRef<Set<string>>(new Set());
 
   const groups = useMemo(() => groupByEra(releasedData, eras), [releasedData, eras]);
 
@@ -248,6 +251,34 @@ export function ReleasedView({ eras, releasedData, searchQuery, spotifyLoggedIn,
       t => t.Name.toLowerCase().includes(q) || t.Notes.toLowerCase().includes(q),
     );
   }, [selectedGroup, searchQuery]);
+
+  // ── auto-search Spotify for tracks missing a link ──────────────────────────
+  useEffect(() => {
+    if (!spotifyLoggedIn || !selectedGroup) return;
+    const eraKey = selectedGroup.eraName;
+    if (searchedEras.current.has(eraKey)) return;
+    searchedEras.current.add(eraKey);
+
+    const tracksToSearch = selectedGroup.tracks.filter(
+      t => t.Streaming === 'Yes' && !t['Link(s)']?.includes('open.spotify.com'),
+    );
+    if (tracksToSearch.length === 0) return;
+
+    let cancelled = false;
+    (async () => {
+      for (const track of tracksToSearch) {
+        if (cancelled) break;
+        const name = track.Name.split('\n')[0].trim();
+        const url = await searchSpotifyTrack(`${name} ${eraKey}`);
+        if (url && !cancelled) {
+          setAutoSpotifyLinks(prev => ({ ...prev, [track.Name]: url }));
+        }
+        if (!cancelled) await new Promise<void>(r => setTimeout(r, 80));
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [selectedGroup?.eraName, spotifyLoggedIn]);
 
   // ── era detail view ─────────────────────────────────────────────────────────
   if (selectedGroup) {
@@ -321,6 +352,10 @@ export function ReleasedView({ eras, releasedData, searchQuery, spotifyLoggedIn,
 
           {filteredTracks.map((track, trackIdx) => {
             const links = parseLinks(track['Link(s)'] ?? '');
+            const autoUrl = autoSpotifyLinks[track.Name];
+            if (autoUrl && !links.some(l => l.platform === 'spotify')) {
+              links.push(parseLinkInfo(autoUrl));
+            }
             const nameParts = track.Name.split('\n').map(s => s.trim()).filter(Boolean);
             const mainName = nameParts[0] ?? track.Name;
             const subName = nameParts.slice(1).join(' ') || undefined;
@@ -366,7 +401,7 @@ export function ReleasedView({ eras, releasedData, searchQuery, spotifyLoggedIn,
                       const isOpen = openEmbed === key;
 
                       // Spotify: use SDK player if logged in + ready
-                      const useSpotifySDK = false;
+                      const useSpotifySDK = link.platform === 'spotify' && !!spotifyLoggedIn && !!spotifyReady && !!onPlaySpotify;
                       const spotifyUri = useSpotifySDK
                         ? (link.url.match(/open\.spotify\.com(?:\/intl-[a-z]+)?\/(track|album)\/([A-Za-z0-9]+)/)
                             ? `spotify:${link.url.match(/open\.spotify\.com(?:\/intl-[a-z]+)?\/(track|album)\/([A-Za-z0-9]+)/)![1]}:${link.url.match(/open\.spotify\.com(?:\/intl-[a-z]+)?\/(track|album)\/([A-Za-z0-9]+)/)![2]}`

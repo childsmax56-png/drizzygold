@@ -386,7 +386,7 @@ export default function App() {
   }, [volume]);
 
   useEffect(() => {
-    if (window.location.search.includes('code=') || window.location.hash.includes('spotify_access_token=')) {
+    if (window.location.search.includes('code=')) {
       handleSpotifyCallback().then(ok => {
         if (ok) setSpotifyLoggedIn(true);
       });
@@ -1184,6 +1184,7 @@ export default function App() {
   };
 
   const handlePlaySong = async (song: Song, era: Era, contextTracks?: Song[], resetShuffleHistory = true, autoPlay = true, isRandomSelection = false) => {
+    if (activePlayer === 'spotify') spotifyControls.pause();
     const rawUrl = song.url || (song.urls && song.urls.length > 0 ? song.urls[0] : '');
     const isNotAvailable = isSongNotAvailable(song, rawUrl);
     
@@ -1702,6 +1703,7 @@ export default function App() {
   };
 
   const handlePlayYoutubeTrack = (videoId: string, title?: string) => {
+    if (activePlayer === 'spotify') spotifyControls.pause();
     if (!youtubeState.isReady) return;
     if (audioRef.current) {
       audioRef.current.pause();
@@ -1713,6 +1715,7 @@ export default function App() {
   };
 
   const handlePlaySoundCloudTrack = (url: string) => {
+    if (activePlayer === 'spotify') spotifyControls.pause();
     if (!soundcloudState.isReady) return;
     if (audioRef.current) {
       audioRef.current.pause();
