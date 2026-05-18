@@ -210,6 +210,33 @@ function groupByEra(data: ReleasedEntry[], allEras: Era[]): ReleasedEraGroup[] {
   });
 }
 
+// ─── spotify auto-search query builder ───────────────────────────────────────
+
+function buildSpotifyQuery(rawName: string, notes: string): string {
+  // First line of name, strip leading emoji/stars
+  const firstLine = rawName.split('\n')[0].trim().replace(/^[\p{Emoji}‍️\s⭐️]+/u, '').trim();
+
+  // Strip trailing parentheticals like (prod. X), (feat. X), (Remix), etc.
+  const stripParens = (s: string) => s.replace(/\s*\([^)]*\)\s*/g, '').trim();
+
+  // "Artist - Song Title" format → feature/collab, use that artist not Drake
+  const dashMatch = firstLine.match(/^(.+?)\s+-\s+(.+)$/);
+  if (dashMatch) {
+    const artist = stripParens(dashMatch[1]).trim();
+    const title = stripParens(dashMatch[2]).trim();
+    return `${title} ${artist}`;
+  }
+
+  // Look for an alternate title hint in notes ("originally titled X", "titled X", "also known as X")
+  const altMatch = notes.match(/(?:originally titled|also (?:titled|known as))\s+"([^"]+)"/i);
+  if (altMatch) {
+    return `${altMatch[1]} Drake`;
+  }
+
+  // Drake's own track
+  return `${stripParens(firstLine)} Drake`;
+}
+
 // ─── main component ───────────────────────────────────────────────────────────
 
 export function ReleasedView({ eras, releasedData, searchQuery, spotifyLoggedIn, spotifyReady, onPlaySpotify, youtubeReady, onPlayYoutube, onPlayAudio, soundcloudReady, onPlaySoundCloud, onPlayArchive, onEmbed }: ReleasedViewProps) {
@@ -268,8 +295,7 @@ export function ReleasedView({ eras, releasedData, searchQuery, spotifyLoggedIn,
     (async () => {
       for (const track of tracksToSearch) {
         if (cancelled) break;
-        const name = track.Name.split('\n')[0].trim();
-        const url = await searchSpotifyTrack(`${name} ${eraKey}`);
+        const url = await searchSpotifyTrack(buildSpotifyQuery(track.Name, track.Notes));
         if (url && !cancelled) {
           setAutoSpotifyLinks(prev => ({ ...prev, [track.Name]: url }));
         }
