@@ -559,8 +559,14 @@ export function ArtGallery({ eras, artData, searchQuery, filters }: ArtGalleryPr
       animate={{ opacity: 1, filter: 'blur(0px)' }}
       exit={{ opacity: 0, filter: 'blur(10px)' }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="p-6 md:p-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 pb-32"
+      className="flex flex-col pb-32"
     >
+      {/* disclaimer banner */}
+      <div className="mx-6 md:mx-8 mt-6 mb-2 px-4 py-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 text-yellow-300/90 text-xs leading-relaxed">
+        <span className="font-semibold">Note:</span> DrizzyTracker has not finished their art tab yet, most entries for art henceforth do not have links. We are working on a definitive fix.
+      </div>
+
+      <div className="p-6 md:p-8 pt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
       {filteredEras.map((era, i) => {
         const imageSrc = CUSTOM_IMAGES[era.name] || era.image;
 
@@ -591,6 +597,7 @@ export function ArtGallery({ eras, artData, searchQuery, filters }: ArtGalleryPr
           </motion.div>
         );
       })}
+      </div>
     </motion.div>
   );
 }
