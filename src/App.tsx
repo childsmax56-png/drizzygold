@@ -517,8 +517,20 @@ export default function App() {
 
     sheetData.forEach((item: any) => {
       const rawEra = (item.Era || '').trim();
-      // Skip era header rows (file count summaries) — their Era cell is multiline
-      if (!rawEra || rawEra.includes('\n')) return;
+      // Era header rows: extract description from Leak Date, then skip song processing
+      if (!rawEra || rawEra.includes('\n')) {
+        if (rawEra.includes('\n')) {
+          const rawName = (item[nameKey] || '').trim();
+          const eraName = rawName.split('\n')[0].trim();
+          const desc = (item['Leak\nDate'] || item['Leak Date'] || '').trim();
+          const matchedMapKey = Object.keys(ERA_MAPPINGS).find(k => k.toLowerCase() === eraName.toLowerCase());
+          const mappedEraName = matchedMapKey ? ERA_MAPPINGS[matchedMapKey] : eraName;
+          if (desc && targetJson.eras?.[mappedEraName] && !targetJson.eras[mappedEraName].description) {
+            targetJson.eras[mappedEraName].description = desc;
+          }
+        }
+        return;
+      }
 
       const matchedMapKey = Object.keys(ERA_MAPPINGS).find(k => k.toLowerCase() === rawEra.toLowerCase());
       const eraName = matchedMapKey ? ERA_MAPPINGS[matchedMapKey] : rawEra;
