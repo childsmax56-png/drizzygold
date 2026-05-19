@@ -44,6 +44,7 @@ export const onRequestGet: PagesFunction = async (context) => {
           eras[eraName] = {
             name: eraName,
             extra: undefined,
+            description: (row['Leak Date'] ?? '').trim() || undefined,
             timeline: (row['Notes'] ?? '').trim() || undefined,
             fileInfo: eraField.split('\n').map((l: string) => l.trim()).filter(Boolean),
             data: { 'Unreleased Tracks': [] },
