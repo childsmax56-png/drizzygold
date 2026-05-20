@@ -2364,6 +2364,7 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
                 <PlaylistsView
                   key="playlists"
                   eras={erasArray}
+                  artData={artData}
                   searchQuery={searchQuery}
                   onPlaySong={handlePlaySong}
                   onToast={showToast}
