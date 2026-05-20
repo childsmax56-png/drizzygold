@@ -87,17 +87,25 @@ export function ArtImage({ url, alt, contain = false }: { url: string; alt: stri
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (imgSrc) return; // already resolved (cached or direct)
-    let mounted = true;
+    setError(false);
     if (url.includes('ibb.co') && !url.includes('i.ibb.co')) {
+      const cached = resolvedCache.get(url);
+      if (cached) { setImgSrc(cached); return; }
+      setImgSrc(null);
+      let mounted = true;
       resolveImbbUrl(url).then(direct => {
         if (!mounted) return;
         if (direct) setImgSrc(direct);
         else setError(true);
       });
+      return () => { mounted = false; };
+    } else if (url.includes('pillows.su/f/')) {
+      const hash = url.split('/f/')[1]?.split('/')[0]?.split('?')[0];
+      setImgSrc(hash ? `https://api.pillows.su/api/get/${hash}` : url);
+    } else {
+      setImgSrc(url);
     }
-    return () => { mounted = false; };
-  }, [url, imgSrc]);
+  }, [url]);
 
   if (error) {
     return (
@@ -126,25 +134,6 @@ export function ArtImage({ url, alt, contain = false }: { url: string; alt: stri
   );
 }
 
-const ART_ERA_ORDER = [
-  'Y.H.N.I.C.',
-  'Training Day',
-  "No Sleep 'Til NYC",
-  'C4',
-  'The Kendrick Lamar EP',
-  'Overly Dedicated',
-  'Collaboration with J. Cole',
-  'Section.80',
-  'good kid, m.A.A.d city',
-  'To Pimp A Butterfly',
-  'untitled unmastered.',
-  'DAMN.',
-  'Black Panther: The Album',
-  'Mr. Morale & The Big Steppers',
-  'Drake vs. Kendrick Lamar',
-  'GNX',
-];
-
 export function ArtGallery({ eras, artData, searchQuery, filters }: ArtGalleryProps) {
   const { settings } = useSettings();
   const [selectedEra, setSelectedEra] = useState<Era | null>(null);
@@ -153,17 +142,8 @@ export function ArtGallery({ eras, artData, searchQuery, filters }: ArtGalleryPr
   const [isDownloading, setIsDownloading] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Include eras present in artData but not in the eras prop (e.g. released-only eras)
-  const allEras = useMemo(() => {
-    const known = new Set(eras.map(e => e.name));
-    const extra = [...new Set(artData.map(item => item.Era).filter(Boolean))]
-      .filter(name => !known.has(name))
-      .map(name => ({ name, data: {} } as Era));
-    return [...eras, ...extra];
-  }, [eras, artData]);
-
   const filteredEras = useMemo(() => {
-    const filtered = allEras.filter(era => {
+    return eras.filter(era => {
       const eraArt = artData.filter(item => item.Era === era.name);
       if (eraArt.length === 0) return false;
 
@@ -173,7 +153,7 @@ export function ArtGallery({ eras, artData, searchQuery, filters }: ArtGalleryPr
       if (!searchQuery && !hasActiveFilters) return true;
 
       const matchesEraName = !hasActiveFilters && searchQuery && (era.name.toLowerCase().includes(q) || (era.extra && era.extra.toLowerCase().includes(q)));
-
+      
       const matchesArt = eraArt.some(item => {
         const pseudoSong = {
           name: item.Name,
@@ -186,16 +166,7 @@ export function ArtGallery({ eras, artData, searchQuery, filters }: ArtGalleryPr
 
       return matchesEraName || matchesArt;
     });
-
-    return [...filtered].sort((a, b) => {
-      const ai = ART_ERA_ORDER.indexOf(a.name);
-      const bi = ART_ERA_ORDER.indexOf(b.name);
-      if (ai === -1 && bi === -1) return 0;
-      if (ai === -1) return 1;
-      if (bi === -1) return -1;
-      return ai - bi;
-    });
-  }, [allEras, artData, searchQuery, filters]);
+  }, [eras, artData, searchQuery, filters]);
 
   const eraItems = useMemo(() => {
     if (!selectedEra) return [];
@@ -244,7 +215,7 @@ export function ArtGallery({ eras, artData, searchQuery, filters }: ArtGalleryPr
     const hash = window.location.hash;
     if (hash.startsWith('#art-')) {
       const hashContent = hash.substring(5);
-      const sortedEras = [...allEras].sort((a, b) => createSlug(b.name).length - createSlug(a.name).length);
+      const sortedEras = [...eras].sort((a, b) => createSlug(b.name).length - createSlug(a.name).length);
 
       const match = sortedEras.find(e => {
         const slug = createSlug(e.name);
@@ -265,7 +236,7 @@ export function ArtGallery({ eras, artData, searchQuery, filters }: ArtGalleryPr
         }
       }
     }
-  }, [allEras, artData]);
+  }, [eras, artData]);
 
   const copyLink = (era: Era, item?: ArtEntry) => {
     let link = `${window.location.origin}/#art-${createSlug(era.name)}`;
@@ -370,7 +341,7 @@ export function ArtGallery({ eras, artData, searchQuery, filters }: ArtGalleryPr
           </div>
         </div>
 
-        <div ref={contentRef} className="flex-1 overflow-y-auto bg-[#0a0a0a] relative">
+        <div ref={contentRef} className="flex-1 overflow-y-auto min-h-0 bg-[#0a0a0a] relative">
           <div className="p-4 md:p-8 max-w-7xl mx-auto">
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {eraItems.map((item, i) => {
@@ -561,14 +532,8 @@ export function ArtGallery({ eras, artData, searchQuery, filters }: ArtGalleryPr
       animate={{ opacity: 1, filter: 'blur(0px)' }}
       exit={{ opacity: 0, filter: 'blur(10px)' }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="flex flex-col pb-32"
+      className="p-6 md:p-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 pb-32"
     >
-      {/* disclaimer banner */}
-      <div className="mx-6 md:mx-8 mt-6 mb-2 px-4 py-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 text-yellow-300/90 text-xs leading-relaxed">
-        <span className="font-semibold">Note:</span> DrizzyTracker has not finished their art tab yet, most entries for art henceforth do not have links. We are working on a definitive fix.
-      </div>
-
-      <div className="p-6 md:p-8 pt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
       {filteredEras.map((era, i) => {
         const imageSrc = CUSTOM_IMAGES[era.name] || era.image;
 
@@ -599,7 +564,6 @@ export function ArtGallery({ eras, artData, searchQuery, filters }: ArtGalleryPr
           </motion.div>
         );
       })}
-      </div>
     </motion.div>
   );
 }
