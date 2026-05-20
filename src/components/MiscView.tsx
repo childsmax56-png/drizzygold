@@ -8,6 +8,7 @@ import { saveAs } from 'file-saver';
 import { useSettings } from '../SettingsContext';
 import { MvEntry, RemixEntry, SampleEntry } from '../App';
 import { findMvsForSong, findRemixesForSong, findSamplesForSong } from './EraDetail';
+import { AddToPlaylistButton } from './AddToPlaylistButton';
 import { ERA_MAPPINGS as CONFIG_ERA_MAPPINGS } from '../artist.config';
 
 export interface MiscEntry {
@@ -471,6 +472,17 @@ export function MiscView({ eras, miscData, searchQuery, filters, onPlaySong, cur
                             >
                               <Star className="w-3.5 h-3.5" fill={isStarred ? "currentColor" : "none"} />
                             </button>
+                          );
+                        })()}
+                        {isPlayable && (() => {
+                          const songUrl = song.url || (song.urls && song.urls.length > 0 ? song.urls[0] : '');
+                          return (
+                            <AddToPlaylistButton
+                              song={song}
+                              eraName="Misc"
+                              url={songUrl}
+                              isCurrentlyPlaying={isCurrentlyPlaying}
+                            />
                           );
                         })()}
                         {!isEmpty && (
