@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, ExternalLink, ChevronDown, ChevronUp, Play } from 'lucide-react';
 import {
@@ -9,9 +9,9 @@ import {
   SiTidal,
   SiBandcamp,
 } from 'react-icons/si';
-import { Era } from '../types';
+import { Era, Song } from '../types';
 import { CUSTOM_IMAGES, ALBUM_DESCRIPTIONS } from '../utils';
-import { searchSpotifyTrack } from '../spotify';
+import { AddToPlaylistButton } from './AddToPlaylistButton';
 
 export interface ReleasedEntry {
   Era: string;
@@ -210,33 +210,6 @@ function groupByEra(data: ReleasedEntry[], allEras: Era[]): ReleasedEraGroup[] {
   });
 }
 
-// ─── spotify auto-search query builder ───────────────────────────────────────
-
-function buildSpotifyQuery(rawName: string, notes: string): string {
-  // First line of name, strip leading emoji/stars
-  const firstLine = rawName.split('\n')[0].trim().replace(/^[\p{Emoji}‍️\s⭐️]+/u, '').trim();
-
-  // Strip trailing parentheticals like (prod. X), (feat. X), (Remix), etc.
-  const stripParens = (s: string) => s.replace(/\s*\([^)]*\)\s*/g, '').trim();
-
-  // "Artist - Song Title" format → feature/collab, use that artist not Drake
-  const dashMatch = firstLine.match(/^(.+?)\s+-\s+(.+)$/);
-  if (dashMatch) {
-    const artist = stripParens(dashMatch[1]).trim();
-    const title = stripParens(dashMatch[2]).trim();
-    return `${title} ${artist}`;
-  }
-
-  // Look for an alternate title hint in notes ("originally titled X", "titled X", "also known as X")
-  const altMatch = notes.match(/(?:originally titled|also (?:titled|known as))\s+"([^"]+)"/i);
-  if (altMatch) {
-    return `${altMatch[1]} Drake`;
-  }
-
-  // Drake's own track
-  return `${stripParens(firstLine)} Drake`;
-}
-
 // ─── main component ───────────────────────────────────────────────────────────
 
 export function ReleasedView({ eras, releasedData, searchQuery, spotifyLoggedIn, spotifyReady, onPlaySpotify, youtubeReady, onPlayYoutube, onPlayAudio, soundcloudReady, onPlaySoundCloud, onPlayArchive, onEmbed }: ReleasedViewProps) {
@@ -244,8 +217,6 @@ export function ReleasedView({ eras, releasedData, searchQuery, spotifyLoggedIn,
   const [isDescExpanded, setIsDescExpanded] = useState(false);
   // key: `${trackIdx}-${linkIdx}`
   const [openEmbed, setOpenEmbed] = useState<string | null>(null);
-  const [autoSpotifyLinks, setAutoSpotifyLinks] = useState<Record<string, string>>({});
-  const searchedEras = useRef<Set<string>>(new Set());
 
   const groups = useMemo(() => groupByEra(releasedData, eras), [releasedData, eras]);
 
@@ -279,42 +250,15 @@ export function ReleasedView({ eras, releasedData, searchQuery, spotifyLoggedIn,
     );
   }, [selectedGroup, searchQuery]);
 
-  // ── auto-search Spotify for tracks missing a link ──────────────────────────
-  useEffect(() => {
-    if (!spotifyLoggedIn || !selectedGroup) return;
-    const eraKey = selectedGroup.eraName;
-    if (searchedEras.current.has(eraKey)) return;
-    searchedEras.current.add(eraKey);
-
-    const tracksToSearch = selectedGroup.tracks.filter(
-      t => t.Streaming === 'Yes' && !t['Link(s)']?.includes('open.spotify.com'),
-    );
-    if (tracksToSearch.length === 0) return;
-
-    let cancelled = false;
-    (async () => {
-      for (const track of tracksToSearch) {
-        if (cancelled) break;
-        const url = await searchSpotifyTrack(buildSpotifyQuery(track.Name, track.Notes));
-        if (url && !cancelled) {
-          setAutoSpotifyLinks(prev => ({ ...prev, [track.Name]: url }));
-        }
-        if (!cancelled) await new Promise<void>(r => setTimeout(r, 80));
-      }
-    })();
-
-    return () => { cancelled = true; };
-  }, [selectedGroup?.eraName, spotifyLoggedIn]);
-
   // ── era detail view ─────────────────────────────────────────────────────────
   if (selectedGroup) {
     return (
       <motion.div
         key="released-detail"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.25 }}
+        initial={{ opacity: 0, filter: 'blur(10px)' }}
+        animate={{ opacity: 1, filter: 'blur(0px)' }}
+        exit={{ opacity: 0, filter: 'blur(10px)' }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
         className="absolute inset-0 z-10 bg-yzy-black overflow-y-auto custom-scrollbar pb-64"
       >
         {/* header */}
@@ -374,14 +318,11 @@ export function ReleasedView({ eras, releasedData, searchQuery, spotifyLoggedIn,
             <div className="w-20 shrink-0 text-right pr-2">Length</div>
             <div className="w-28 shrink-0">Type</div>
             <div className="w-48 shrink-0">Listen</div>
+            <div className="w-8 shrink-0" />
           </div>
 
           {filteredTracks.map((track, trackIdx) => {
             const links = parseLinks(track['Link(s)'] ?? '');
-            const autoUrl = autoSpotifyLinks[track.Name];
-            if (autoUrl && !links.some(l => l.platform === 'spotify')) {
-              links.push(parseLinkInfo(autoUrl));
-            }
             const nameParts = track.Name.split('\n').map(s => s.trim()).filter(Boolean);
             const mainName = nameParts[0] ?? track.Name;
             const subName = nameParts.slice(1).join(' ') || undefined;
@@ -483,6 +424,18 @@ export function ReleasedView({ eras, releasedData, searchQuery, spotifyLoggedIn,
                       );
                     })}
                   </div>
+
+                  {/* add to playlist */}
+                  {links.length > 0 && (
+                    <div className="w-8 shrink-0 hidden sm:flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                      <AddToPlaylistButton
+                        song={{ name: mainName, url: links[0].url, track_length: track.Length } as unknown as Song}
+                        eraName={selectedGroup.eraName}
+                        url={links[0].url}
+                        isCurrentlyPlaying={false}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* inline embed accordion */}
@@ -533,14 +486,8 @@ export function ReleasedView({ eras, releasedData, searchQuery, spotifyLoggedIn,
       animate={{ opacity: 1, filter: 'blur(0px)' }}
       exit={{ opacity: 0, filter: 'blur(10px)' }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="flex flex-col pb-32"
+      className="p-6 md:p-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 pb-32"
     >
-      {/* disclaimer banner */}
-      <div className="mx-6 md:mx-8 mt-6 mb-2 px-4 py-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 text-yellow-300/90 text-xs leading-relaxed">
-        <span className="font-semibold">Note:</span> Drizzytracker currently has not finished their released tab yet. To temporarily fix the problem for now we have added an AI song matcher from Spotify that will attempt to find the song on Spotify. Beware that it is not always right and that we are working on a definitive fix.
-      </div>
-
-      <div className="p-6 md:p-8 pt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
       {filteredGroups.map((group, i) => (
         <motion.div
           key={group.eraName}
@@ -574,7 +521,6 @@ export function ReleasedView({ eras, releasedData, searchQuery, spotifyLoggedIn,
           </div>
         </motion.div>
       ))}
-      </div>
     </motion.div>
   );
 }
