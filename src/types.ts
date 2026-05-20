@@ -50,6 +50,7 @@ export interface PlaylistSong {
 export interface UserPlaylist {
   id: string;
   name: string;
+  cover?: string;
   songs: PlaylistSong[];
 }
 

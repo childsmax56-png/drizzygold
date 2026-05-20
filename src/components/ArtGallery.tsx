@@ -70,7 +70,9 @@ async function resolveImbbUrl(url: string): Promise<string | null> {
   return promise;
 }
 
-function ArtImage({ url, alt, contain = false }: { url: string; alt: string; contain?: boolean }) {
+export { resolveImbbUrl };
+
+export function ArtImage({ url, alt, contain = false }: { url: string; alt: string; contain?: boolean }) {
   const [imgSrc, setImgSrc] = useState<string | null>(() => {
     // Synchronously return cached value if available
     if (url.includes('ibb.co') && !url.includes('i.ibb.co')) {
