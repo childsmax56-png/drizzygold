@@ -529,10 +529,10 @@ export function EraDetail({ era, onBack, onPlaySong, searchQuery = '', filters, 
               </div>
             )}
 
-            {(ALBUM_DESCRIPTIONS[era.name] || (era as any).description) && (
+            {ALBUM_DESCRIPTIONS[era.name] && (
               <div className="mb-2 max-w-3xl">
                 <p className={`text-white/80 text-sm leading-relaxed ${isDescriptionExpanded ? '' : 'line-clamp-3'}`}>
-                  {ALBUM_DESCRIPTIONS[era.name] || (era as any).description}
+                  {ALBUM_DESCRIPTIONS[era.name]}
                 </p>
                 <button 
                   onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
@@ -704,7 +704,7 @@ export function EraDetail({ era, onBack, onPlaySong, searchQuery = '', filters, 
                             );
                           })()}
                           {(() => {
-                            if (!isPlayable) return null;
+                            if (isEmpty) return null;
                             const songUrl = song.url || (song.urls && song.urls.length > 0 ? song.urls[0] : '');
                             const eraNameForPlaylist = (song as any).realEra?.name || era.name;
                             return (
