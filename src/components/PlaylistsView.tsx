@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Play, Trash2, Pencil, Check, X, ChevronUp, ChevronDown, ListMusic, Shuffle, Share2, ImagePlus } from 'lucide-react';
+import { Plus, Play, Trash2, Pencil, Check, X, ChevronUp, ChevronDown, ListMusic, Shuffle, Share2, ImagePlus, Download } from 'lucide-react';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 import { usePlaylists } from '../PlaylistContext';
 import { Era, Song } from '../types';
 import { ArtEntry, ArtImage } from './ArtGallery';
@@ -26,7 +28,30 @@ function resolvePlaylistSongs(playlist: ReturnType<typeof usePlaylists>['playlis
       if (entry.song) return { ...entry.song, realEra: realEra ?? undefined };
       return null;
     })
-    .filter((s): s is Song => s !== null);
+    .filter(s => s !== null) as Song[];
+}
+
+async function resolveDownloadUrl(url: string): Promise<string | null> {
+  if (url.includes('pillows.su/f/') || url.includes('pillowcase.su/f/')) {
+    const host = url.includes('pillows.su') ? 'api.pillows.su' : 'api.pillowcase.su';
+    const hash = url.split('/f/')[1]?.split('/')[0]?.split('?')[0];
+    if (hash) return `https://${host}/api/get/${hash}`;
+  }
+  if (url.includes('temp.imgur.gg/f/')) {
+    const id = url.split('/f/')[1];
+    if (id) {
+      const res = await fetch(`https://temp.imgur.gg/api/file/${id}`).catch(() => null);
+      if (res?.ok) {
+        const data = await res.json().catch(() => null);
+        if (data?.cdnUrl) return data.cdnUrl;
+      }
+    }
+  }
+  return null;
+}
+
+function isDirectlyDownloadable(url: string): boolean {
+  return url.includes('pillows.su/f/') || url.includes('pillowcase.su/f/') || url.includes('temp.imgur.gg/f/');
 }
 
 export function PlaylistsView({ eras, artData = [], searchQuery = '', onPlaySong, onToast }: Props) {
@@ -37,8 +62,79 @@ export function PlaylistsView({ eras, artData = [], searchQuery = '', onPlaySong
   const [renameValue, setRenameValue] = useState('');
   const [creatingNew, setCreatingNew] = useState(false);
   const [newName, setNewName] = useState('');
+  const [downloading, setDownloading] = useState(false);
 
   const selectedPlaylist = playlists.find(p => p.id === selectedId) ?? null;
+
+  const downloadZip = async (playlist: ReturnType<typeof usePlaylists>['playlists'][0]) => {
+    if (downloading) return;
+    setDownloading(true);
+    onToast?.('Building zip...');
+
+    const zip = new JSZip();
+    const songs = resolvePlaylistSongs(playlist, eras);
+    const usedNames = new Set<string>();
+
+    let tracklist = `${playlist.name}\n${'─'.repeat(playlist.name.length)}\n\n`;
+    let downloaded = 0;
+    let skipped = 0;
+
+    for (let i = 0; i < playlist.songs.length; i++) {
+      const entry = playlist.songs[i];
+      const song = songs[i];
+      const rawUrl = entry.url ?? song?.url ?? '';
+      const displayNum = String(i + 1).padStart(2, '0');
+      const baseName = `${displayNum}. ${entry.songName}`;
+
+      tracklist += `${baseName}`;
+      if (rawUrl) tracklist += `\n  ${rawUrl}`;
+      tracklist += '\n\n';
+
+      if (!rawUrl || !isDirectlyDownloadable(rawUrl)) {
+        skipped++;
+        continue;
+      }
+
+      try {
+        const fetchUrl = await resolveDownloadUrl(rawUrl);
+        if (!fetchUrl) { skipped++; continue; }
+
+        const res = await fetch(fetchUrl).catch(() => null);
+        if (!res?.ok) { skipped++; continue; }
+
+        const ct = res.headers.get('content-type') ?? '';
+        if (ct.startsWith('text/html') || ct.startsWith('application/json')) { skipped++; continue; }
+
+        const blob = await res.blob();
+        const ext = ct.includes('flac') ? '.flac' : ct.includes('wav') ? '.wav' : '.mp3';
+        let fileName = `${baseName}${ext}`;
+        if (usedNames.has(fileName)) {
+          fileName = `${baseName} (${i + 1})${ext}`;
+        }
+        usedNames.add(fileName);
+        zip.file(fileName, blob);
+        downloaded++;
+      } catch {
+        skipped++;
+      }
+    }
+
+    zip.file('tracklist.txt', tracklist);
+
+    try {
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const zipName = `${playlist.name.replace(/[^a-z0-9 ]/gi, '_')}.zip`;
+      saveAs(zipBlob, zipName);
+      const msg = downloaded > 0
+        ? `Downloaded ${downloaded} file${downloaded !== 1 ? 's' : ''}${skipped > 0 ? ` (${skipped} skipped — non-direct links)` : ''}`
+        : `No downloadable files found — tracklist saved to zip`;
+      onToast?.(msg);
+    } catch {
+      onToast?.('Failed to create zip');
+    }
+
+    setDownloading(false);
+  };
 
   const filteredPlaylists = searchQuery
     ? playlists.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -250,6 +346,14 @@ export function PlaylistsView({ eras, artData = [], searchQuery = '', onPlaySong
                       </button>
                     </>
                   )}
+                  <button
+                    onClick={() => downloadZip(selectedPlaylist)}
+                    disabled={downloading}
+                    className="p-2 rounded text-white/30 hover:text-white hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    title="Download playlist as zip"
+                  >
+                    <Download className={`w-4 h-4 ${downloading ? 'animate-pulse' : ''}`} />
+                  </button>
                   <button
                     onClick={() => sharePlaylist(selectedPlaylist)}
                     className="p-2 rounded text-white/30 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
