@@ -8,6 +8,7 @@ import { saveAs } from 'file-saver';
 import { useSettings } from '../SettingsContext';
 import { MvEntry, RemixEntry, SampleEntry } from '../App';
 import { findMvsForSong, findRemixesForSong, findSamplesForSong } from './EraDetail';
+import { AddToPlaylistButton } from './AddToPlaylistButton';
 import { ERA_MAPPINGS as CONFIG_ERA_MAPPINGS } from '../artist.config';
 
 export interface StemEntry {
@@ -527,6 +528,17 @@ export function StemsView({ eras, stemsData, searchQuery, filters, onPlaySong, c
                               >
                                 <Star className="w-3.5 h-3.5" fill={isStarred ? "currentColor" : "none"} />
                               </button>
+                            );
+                          })()}
+                          {isPlayable && (() => {
+                            const songUrl = song.url || (song.urls && song.urls.length > 0 ? song.urls[0] : '');
+                            return (
+                              <AddToPlaylistButton
+                                song={song}
+                                eraName="Stems"
+                                url={songUrl}
+                                isCurrentlyPlaying={isCurrentlyPlaying}
+                              />
                             );
                           })()}
                           {!isEmpty && (

@@ -10,6 +10,7 @@ import { useSettings } from '../SettingsContext';
 import { isLastfmLoggedIn } from '../lastfm';
 import { SiLastdotfm } from 'react-icons/si';
 import { MvEntry, RemixEntry, SampleEntry } from '../App';
+import { AddToPlaylistButton } from './AddToPlaylistButton';
 
 function normalizeName(name: string): string {
   return name
@@ -528,10 +529,10 @@ export function EraDetail({ era, onBack, onPlaySong, searchQuery = '', filters, 
               </div>
             )}
 
-            {(ALBUM_DESCRIPTIONS[era.name] || (era as any).description) && (
+            {ALBUM_DESCRIPTIONS[era.name] && (
               <div className="mb-2 max-w-3xl">
                 <p className={`text-white/80 text-sm leading-relaxed ${isDescriptionExpanded ? '' : 'line-clamp-3'}`}>
-                  {ALBUM_DESCRIPTIONS[era.name] || (era as any).description}
+                  {ALBUM_DESCRIPTIONS[era.name]}
                 </p>
                 <button 
                   onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
@@ -700,6 +701,19 @@ export function EraDetail({ era, onBack, onPlaySong, searchQuery = '', filters, 
                               >
                                 <Star className="w-3.5 h-3.5" fill={isStarred ? "currentColor" : "none"} />
                               </button>
+                            );
+                          })()}
+                          {(() => {
+                            if (isEmpty) return null;
+                            const songUrl = song.url || (song.urls && song.urls.length > 0 ? song.urls[0] : '');
+                            const eraNameForPlaylist = (song as any).realEra?.name || era.name;
+                            return (
+                              <AddToPlaylistButton
+                                song={song}
+                                eraName={eraNameForPlaylist}
+                                url={songUrl}
+                                isCurrentlyPlaying={isCurrentlyPlaying}
+                              />
                             );
                           })()}
                           {(() => {
