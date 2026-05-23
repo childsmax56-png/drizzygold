@@ -535,12 +535,8 @@ export function ReleasedView({ eras, releasedData, searchQuery, spotifyLoggedIn,
       transition={{ duration: 0.4, ease: 'easeOut' }}
       className="flex flex-col pb-32"
     >
-      {/* disclaimer banner */}
-      <div className="mx-6 md:mx-8 mt-6 mb-2 px-4 py-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 text-yellow-300/90 text-xs leading-relaxed">
-        <span className="font-semibold">Note:</span> Drizzytracker currently has not finished their released tab yet. To temporarily fix the problem for now we have added an AI song matcher from Spotify that will attempt to find the song on Spotify. Beware that it is not always right and that we are working on a definitive fix.
-      </div>
 
-      <div className="p-6 md:p-8 pt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+<div className="p-6 md:p-8 pt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
       {filteredGroups.map((group, i) => (
         <motion.div
           key={group.eraName}

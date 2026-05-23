@@ -8,7 +8,8 @@ const VALID_TYPES = new Set([
 function normalizeRow(row: Record<string, string>): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [key, val] of Object.entries(row)) {
-    out[key === 'Track Length' ? 'Length' : key] = val;
+    const k = key === 'Track Length' ? 'Length' : key === 'Date' ? 'Release Date' : key;
+    out[k] = val;
   }
   return out;
 }

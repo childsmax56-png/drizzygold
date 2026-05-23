@@ -2236,13 +2236,8 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
           onHomeClick={handleHomeClick}
           activeCategory={activeCategory}
           onCategoryChange={handleCategoryChange}
-          lastfmLoggedIn={lastfmLoggedIn}
-          onLastfmLogout={() => setLastfmLoggedIn(false)}
           onRandomSongClick={handleRandomSongClick}
           isRandomMode={isRandomMode}
-          spotifyLoggedIn={spotifyLoggedIn}
-          onSpotifyLogin={startSpotifyAuth}
-          onSpotifyLogout={() => { clearSpotifySession(); setSpotifyLoggedIn(false); setActivePlayer('audio'); }}
           yeiOpen={yeiOpen}
           onYEIClick={() => setYeiOpen(o => !o)}
         />
@@ -2329,7 +2324,6 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
                   eras={erasArray}
                   releasedData={releasedData}
                   searchQuery={searchQuery}
-                  spotifyLoggedIn={spotifyLoggedIn}
                   spotifyReady={spotifyState.isReady}
                   onPlaySpotify={handlePlaySpotifyTrack}
                   youtubeReady={youtubeState.isReady}
