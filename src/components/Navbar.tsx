@@ -74,9 +74,9 @@ export function Navbar({ searchQuery, setSearchQuery, filters, setFilters, onHom
           <div className="md:hidden flex items-center shrink-0">
             <img
               src="/logo.png"
-              alt="YZY Gold"
+              alt="DRIZZYgold"
               onClick={onHomeClick}
-              className="h-[48px] w-[160px] object-cover object-center cursor-pointer hover:opacity-80 transition-opacity duration-300"
+              className="h-[40px] w-auto object-contain object-left cursor-pointer hover:opacity-80 transition-opacity duration-300"
             />
           </div>
 
@@ -117,12 +117,12 @@ export function Navbar({ searchQuery, setSearchQuery, filters, setFilters, onHom
                 )}
               </div>
               {/* desktop logo fills the gap between search and center */}
-              <div className="hidden md:block w-[170px] h-[60px] shrink-0 overflow-hidden">
+              <div className="hidden md:block max-w-[220px] h-[48px] shrink-0">
                 <img
                   src="/logo.png"
-                  alt="YZY Gold"
+                  alt="DRIZZYgold"
                   onClick={onHomeClick}
-                  className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity duration-300"
+                  className="h-full w-auto object-contain cursor-pointer hover:opacity-80 transition-opacity duration-300"
                   style={{ objectPosition: 'center center' }}
                 />
               </div>
