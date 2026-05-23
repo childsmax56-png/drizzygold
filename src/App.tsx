@@ -2386,7 +2386,7 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
               VAMPGOLD 2026 ©
             </p>
             <p className="text-[10px] text-white/30 leading-relaxed mt-1">
-              Logo created by Nr7th on discord
+              logo created by YZYsam on discord
             </p>
             <p className="text-[10px] text-white/30 leading-relaxed mt-1 space-x-3">
               <a href="https://discord.gg/TYqdey3B" target="_blank" rel="noopener noreferrer" className="text-[var(--theme-color)]/50 hover:text-[var(--theme-color)] transition-colors underline">Discord</a>
