@@ -1864,7 +1864,7 @@ export default function App() {
         className="h-screen w-full relative bg-black overflow-hidden transition-opacity duration-700"
         style={{ opacity: loadingFading ? 0 : 1 }}
       >
-        <div className="w-full h-full flex items-center justify-center">
+        <div className="w-full h-full flex flex-col items-center justify-center gap-3">
           {screen?.type === 'gif' && screen.url && (
             <img src={screen.url} alt={screen.label} className="w-[200px] h-[200px] sm:w-[400px] sm:h-[400px] object-contain" onLoad={() => setGifReady(true)} />
           )}
@@ -1873,6 +1873,9 @@ export default function App() {
           )}
           {(!screen || screen.type === 'none') && (
             <div className="animate-pulse text-sm font-bold tracking-widest uppercase text-white/50">Loading Songs...</div>
+          )}
+          {screen && screen.type !== 'none' && (
+            <div className="text-xs text-white/30">loading screens made by PAW on discord</div>
           )}
         </div>
       </div>
