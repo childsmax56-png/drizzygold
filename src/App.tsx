@@ -162,12 +162,22 @@ export default function App() {
     if (!loading) {
       const effectiveId = settings.loadingScreen === 'shuffle' ? (resolvedShuffleScreenId ?? 'none') : settings.loadingScreen;
       const screen = LOADING_SCREENS.find(s => s.id === effectiveId);
-      if (screen?.type === 'gif' && !gifReady) {
-        const t = setTimeout(() => {
-          setLoadingFading(true);
-          setTimeout(() => setLoadingFading(false), 700);
-        }, 6000);
-        return () => clearTimeout(t);
+      if (screen?.type === 'gif') {
+        if (!gifReady) {
+          // Fallback: fade after 6s if gif never loads
+          const t = setTimeout(() => {
+            setLoadingFading(true);
+            setTimeout(() => setLoadingFading(false), 700);
+          }, 6000);
+          return () => clearTimeout(t);
+        } else {
+          // Gif loaded — show for 3s then fade
+          const t = setTimeout(() => {
+            setLoadingFading(true);
+            setTimeout(() => setLoadingFading(false), 700);
+          }, 3000);
+          return () => clearTimeout(t);
+        }
       }
       setLoadingFading(true);
       const t = setTimeout(() => setLoadingFading(false), 700);
