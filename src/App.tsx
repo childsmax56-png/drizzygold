@@ -1866,25 +1866,23 @@ export default function App() {
     setActiveCategory('music');
   };
 
-  if (loading || loadingFading) {
-    const effectiveId = settings.loadingScreen === 'shuffle' ? (resolvedShuffleScreenId ?? 'none') : settings.loadingScreen;
-    const screen = LOADING_SCREENS.find(s => s.id === effectiveId);
+  const _loadingEffectiveId = settings.loadingScreen === 'shuffle' ? (resolvedShuffleScreenId ?? 'none') : settings.loadingScreen;
+  const _loadingScreen = LOADING_SCREENS.find(s => s.id === _loadingEffectiveId);
+
+  if (loading) {
     return (
-      <div
-        className="h-screen w-full relative bg-black overflow-hidden transition-opacity duration-700"
-        style={{ opacity: loadingFading ? 0 : 1 }}
-      >
+      <div className="h-screen w-full relative bg-black overflow-hidden">
         <div className="w-full h-full flex flex-col items-center justify-center gap-3">
-          {screen?.type === 'gif' && screen.url && (
-            <img src={screen.url} alt={screen.label} className="w-[200px] h-[200px] sm:w-[400px] sm:h-[400px] object-contain" onLoad={() => setGifReady(true)} />
+          {_loadingScreen?.type === 'gif' && _loadingScreen.url && (
+            <img src={_loadingScreen.url} alt={_loadingScreen.label} className="w-[200px] h-[200px] sm:w-[400px] sm:h-[400px] object-contain" onLoad={() => setGifReady(true)} />
           )}
-          {screen?.type === 'video' && screen.url && (
-            <video src={screen.url} autoPlay loop playsInline className="w-[400px] h-[400px] object-contain" ref={(el) => { if (el) el.muted = true; }} />
+          {_loadingScreen?.type === 'video' && _loadingScreen.url && (
+            <video src={_loadingScreen.url} autoPlay loop playsInline className="w-[400px] h-[400px] object-contain" ref={(el) => { if (el) el.muted = true; }} />
           )}
-          {(!screen || screen.type === 'none') && (
+          {(!_loadingScreen || _loadingScreen.type === 'none') && (
             <div className="animate-pulse text-sm font-bold tracking-widest uppercase text-white/50">Loading Songs...</div>
           )}
-          {screen && screen.type !== 'none' && (
+          {_loadingScreen && _loadingScreen.type !== 'none' && (
             <div className="text-xs text-white/30">loading screens made by PAW on discord</div>
           )}
         </div>
@@ -2807,6 +2805,26 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
         }}
         onNavigatePlaylists={() => setActiveCategory('playlists')}
       />
+    )}
+
+    {loadingFading && (
+      <div
+        className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center gap-3 pointer-events-none"
+        style={{ animation: 'loading-fade-out 700ms ease forwards' }}
+      >
+        {_loadingScreen?.type === 'gif' && _loadingScreen.url && (
+          <img src={_loadingScreen.url} alt={_loadingScreen.label} className="w-[200px] h-[200px] sm:w-[400px] sm:h-[400px] object-contain" />
+        )}
+        {_loadingScreen?.type === 'video' && _loadingScreen.url && (
+          <video src={_loadingScreen.url} autoPlay loop playsInline className="w-[400px] h-[400px] object-contain" ref={(el) => { if (el) el.muted = true; }} />
+        )}
+        {(!_loadingScreen || _loadingScreen.type === 'none') && (
+          <div className="text-sm font-bold tracking-widest uppercase text-white/50">Loading Songs...</div>
+        )}
+        {_loadingScreen && _loadingScreen.type !== 'none' && (
+          <div className="text-xs text-white/30">loading screens made by PAW on discord</div>
+        )}
+      </div>
     )}
     </PlaylistProvider>
   );
