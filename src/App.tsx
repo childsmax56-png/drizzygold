@@ -75,7 +75,7 @@ import { PlaylistProvider } from './PlaylistContext';
 import { ReleasedView, ReleasedEntry } from './components/ReleasedView';
 import { VideosView, VideoRawEntry } from './components/VideosView';
 import { ChatBubble } from './components/ChatBubble';
-import { useSettings, LOADING_SCREENS } from './SettingsContext';
+import { useSettings, LOADING_SCREENS, LoadingScreenId } from './SettingsContext';
 import { recordListeningHistory } from './history';
 
 const ERA_MAPPINGS: Record<string, string> = {};
@@ -86,6 +86,13 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [loadingFading, setLoadingFading] = useState(false);
   const [gifReady, setGifReady] = useState(false);
+  const [resolvedShuffleScreenId] = useState<LoadingScreenId | null>(() => {
+    if (settings.loadingScreen === 'shuffle') {
+      const eligible = LOADING_SCREENS.filter(s => s.type !== 'none');
+      if (eligible.length > 0) return eligible[Math.floor(Math.random() * eligible.length)].id;
+    }
+    return null;
+  });
   const [showChangelog, setShowChangelog] = useState(false);
   const [showSafariWarning, setShowSafariWarning] = useState(false);
   const [mvData, setMvData] = useState<MvEntry[]>([]);
@@ -153,7 +160,8 @@ export default function App() {
 
   useEffect(() => {
     if (!loading) {
-      const screen = LOADING_SCREENS.find(s => s.id === settings.loadingScreen);
+      const effectiveId = settings.loadingScreen === 'shuffle' ? (resolvedShuffleScreenId ?? 'none') : settings.loadingScreen;
+      const screen = LOADING_SCREENS.find(s => s.id === effectiveId);
       if (screen?.type === 'gif' && !gifReady) {
         const t = setTimeout(() => {
           setLoadingFading(true);
@@ -1849,7 +1857,8 @@ export default function App() {
   };
 
   if (loading || loadingFading) {
-    const screen = LOADING_SCREENS.find(s => s.id === settings.loadingScreen);
+    const effectiveId = settings.loadingScreen === 'shuffle' ? (resolvedShuffleScreenId ?? 'none') : settings.loadingScreen;
+    const screen = LOADING_SCREENS.find(s => s.id === effectiveId);
     return (
       <div
         className="h-screen w-full relative bg-black overflow-hidden transition-opacity duration-700"

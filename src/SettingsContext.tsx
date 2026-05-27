@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type MiniLyricsAlignment = 'left' | 'center' | 'right';
 export type GlobalFontSize = 'small' | 'medium' | 'large';
-export type LoadingScreenId = 'none';
+export type LoadingScreenId = 'none' | 'shuffle' | 'takecare' | 'thankmelater' | 'nwts' | 'clb' | 'honestlynevermind' | 'iyrtitl' | 'herloss' | 'morelife' | 'scorpion' | 'sofargone' | 'views';
 
 export interface LoadingScreenOption {
   id: LoadingScreenId;
@@ -13,6 +13,18 @@ export interface LoadingScreenOption {
 
 export const LOADING_SCREENS: LoadingScreenOption[] = [
   { id: 'none', label: 'None', type: 'none' },
+  { id: 'shuffle', label: 'Shuffle', type: 'none' },
+  { id: 'takecare', label: 'Take Care', type: 'gif', url: 'https://i.ibb.co/pBtLbGHy/IMG-4149.gif' },
+  { id: 'thankmelater', label: 'Thank Me Later', type: 'gif', url: 'https://i.ibb.co/wXCBygN/IMG-4148.gif' },
+  { id: 'nwts', label: 'Nothing Was the Same', type: 'gif', url: 'https://i.ibb.co/fGPG3QVC/IMG-4147.gif' },
+  { id: 'clb', label: 'Certified Lover Boy', type: 'gif', url: 'https://i.ibb.co/j279Kz5/CLB.gif' },
+  { id: 'honestlynevermind', label: 'Honestly Nevermind', type: 'gif', url: 'https://i.ibb.co/0p3H4Tmy/IMG-4218.gif' },
+  { id: 'iyrtitl', label: "If You're Reading This It's Too Late", type: 'gif', url: 'https://i.ibb.co/T9vx1kR/IYRTITL.gif' },
+  { id: 'herloss', label: 'Her Loss', type: 'gif', url: 'https://i.ibb.co/yn42p7cQ/her-loss.gif' },
+  { id: 'morelife', label: 'More Life', type: 'gif', url: 'https://i.ibb.co/bcmf1WZ/more-life.gif' },
+  { id: 'scorpion', label: 'Scorpion', type: 'gif', url: 'https://i.ibb.co/vCKB4xZ1/Scorpion.gif' },
+  { id: 'sofargone', label: 'So Far Gone', type: 'gif', url: 'https://i.ibb.co/H5J3vbN/sfg.gif' },
+  { id: 'views', label: 'Views', type: 'gif', url: 'https://i.ibb.co/SwmyNq2Y/views.gif' },
 ];
 
 export interface AppSettings {
