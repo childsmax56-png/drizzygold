@@ -400,9 +400,10 @@ interface VideoRowProps {
   miniPlayerMode: boolean;
   activeMiniEntry: VideoEntry | null;
   onOpenMiniPlayer: (entry: VideoEntry) => void;
+  onVideoPlay?: () => void;
 }
 
-function VideoRow({ entry, miniPlayerMode, activeMiniEntry, onOpenMiniPlayer }: VideoRowProps) {
+function VideoRow({ entry, miniPlayerMode, activeMiniEntry, onOpenMiniPlayer, onVideoPlay }: VideoRowProps) {
   const [expanded, setExpanded] = useState(false);
   const [activeLink, setActiveLink] = useState(0);
 
@@ -414,8 +415,10 @@ function VideoRow({ entry, miniPlayerMode, activeMiniEntry, onOpenMiniPlayer }: 
   const handleClick = () => {
     if (isUnavailable) return;
     if (miniPlayerMode) {
+      onVideoPlay?.();
       onOpenMiniPlayer(entry);
     } else {
+      if (!expanded) onVideoPlay?.();
       setExpanded(e => !e);
     }
   };
@@ -558,9 +561,10 @@ interface EraDetailViewProps {
   miniPlayerMode: boolean;
   activeMiniEntry: VideoEntry | null;
   onOpenMiniPlayer: (entry: VideoEntry) => void;
+  onVideoPlay?: () => void;
 }
 
-function EraDetailView({ eraGroup, onBack, searchQuery, miniPlayerMode, activeMiniEntry, onOpenMiniPlayer }: EraDetailViewProps) {
+function EraDetailView({ eraGroup, onBack, searchQuery, miniPlayerMode, activeMiniEntry, onOpenMiniPlayer, onVideoPlay }: EraDetailViewProps) {
   const filterEntries = (entries: VideoEntry[]) => {
     if (!searchQuery) return entries;
     const q = searchQuery.toLowerCase();
@@ -633,6 +637,7 @@ function EraDetailView({ eraGroup, onBack, searchQuery, miniPlayerMode, activeMi
                   miniPlayerMode={miniPlayerMode}
                   activeMiniEntry={activeMiniEntry}
                   onOpenMiniPlayer={onOpenMiniPlayer}
+                  onVideoPlay={onVideoPlay}
                 />
               ))}
             </div>
@@ -653,6 +658,7 @@ function EraDetailView({ eraGroup, onBack, searchQuery, miniPlayerMode, activeMi
                   miniPlayerMode={miniPlayerMode}
                   activeMiniEntry={activeMiniEntry}
                   onOpenMiniPlayer={onOpenMiniPlayer}
+                  onVideoPlay={onVideoPlay}
                 />
               ))}
             </div>
@@ -673,9 +679,10 @@ interface VideosViewProps {
   eras: Era[];
   videosData: VideoRawEntry[];
   searchQuery: string;
+  onVideoPlay?: () => void;
 }
 
-export function VideosView({ eras, videosData, searchQuery }: VideosViewProps) {
+export function VideosView({ eras, videosData, searchQuery, onVideoPlay }: VideosViewProps) {
   const { settings } = useSettings();
   const [selectedEra, setSelectedEra] = useState<string | null>(null);
   const [miniPlayer, setMiniPlayer] = useState<MiniPlayerState | null>(null);
@@ -764,6 +771,7 @@ export function VideosView({ eras, videosData, searchQuery }: VideosViewProps) {
           miniPlayerMode={miniPlayerMode}
           activeMiniEntry={miniPlayer?.entry ?? null}
           onOpenMiniPlayer={openMiniPlayer}
+          onVideoPlay={onVideoPlay}
         />
       ) : (
         <motion.div

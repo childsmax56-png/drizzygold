@@ -2425,6 +2425,15 @@ let relatedErasArray = (Object.values(data.eras || {}) as Era[])
                   eras={erasArray}
                   videosData={videosData}
                   searchQuery={searchQuery}
+                  onVideoPlay={() => {
+                    if (audioRef.current) {
+                      audioRef.current.pause();
+                      setIsPlaying(false);
+                    }
+                    if (activePlayer === 'spotify') spotifyControls.pause();
+                    if (activePlayer === 'youtube' && youtubeState.isPlaying) youtubeControls.togglePlay();
+                    if (activePlayer === 'soundcloud' && soundcloudState.isPlaying) soundcloudControls.togglePlay();
+                  }}
                 />
               ) : activeCategory === 'released' ? (
                 <ReleasedView
